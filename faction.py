@@ -10,14 +10,14 @@ class Faction:
 
 def get_factions():
     return [
-        Faction("The Eldrath", "Dawni magowie północy, władający starożytną magią i tajemnymi rytuałami."),
-        Faction("Valyria Confederacy", "Zjednoczenie wolnych miast pustyni – szybkie jednostki, złoto i kupcy."),
-        Faction("Empire of Thalin", "Imperium ludzi – duma, potęga i rycerski porządek."),
-        Faction("Kyloun", "Zimna, surowa kraina pamięci, pełna wojowników lodu."),
-        Faction("Drekkul Fells", "Mroczne góry zamieszkane przez nekromantów i zbiegów."),
+        Faction("The Eldrath", "Dawni magowie północy, władający starożytną magią."),
+        Faction("Valyria Confederacy", "Zjednoczenie wolnych miast pustyni – mistrzowie alchemii."),
+        Faction("Empire of Thalin", "Imperium ludzi – duma, potęga i rycerski honor."),
+        Faction("K'Yoloun", "Zimna, surowa kraina pamięci, pełna wojowników lodu."),
+        Faction("Drekbull Kells", "Wrzosowe góry zamieszkane przez nekromantów."),
         Faction("Shadoween", "Ukryta frakcja skrytobójców, mistrzów cienia."),
         Faction("Rain", "Magowie burz i deszczu, panujący nad pogodą."),
-        Faction("Misweth Thalin", "Elfy lasu, strzegące tajemnic pradawnych drzew.")
+        Faction("Miswevh Thalin", "Elfy lasu, strzegące tajemnic pradawnych cywilizacji.")
     ]
 
 
