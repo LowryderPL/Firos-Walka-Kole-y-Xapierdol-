@@ -1,47 +1,38 @@
-from inventory import inventory
+class Faction:
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
 
-class GameEngine:
-    def __init__(self):
-        self.action_points = 5
+    def display_info(self):
+        print(f"=== Frakcja: {self.name} ===")
+        print(self.description)
 
-    def run(self):
-        print("\n=== ROZPOCZYNAMY GRĘ ===")
-        print(f"Masz {self.action_points} punktów akcji.\n")
 
-        while self.action_points > 0:
-            print("1. Wyrusz na misję")
-            print("2. Odpocznij")
-            print("3. Zakończ turę")
+def get_factions():
+    return [
+        Faction("The Eldrath", "Dawni magowie północy, władający starożytną magią."),
+        Faction("Valyria Confederacy", "Zjednoczenie wolnych miast pustyni – mistrzowie alchemii."),
+        Faction("Empire of Thalin", "Imperium ludzi – duma, potęga i rycerski honor."),
+        Faction("K’Yoloun", "Zimna, surowa kraina pamięci, pełna wojowników lodu."),
+        Faction("Drekbull Fells", "Mroczne góry zamieszkane przez nekromantów."),
+        Faction("Shadoween", "Ukryta frakcja skrytobójców, mistrzów cienia."),
+        Faction("Rain", "Magowie burz i deszczu, panujący nad pogodą."),
+        Faction("Miswehh Thalin", "Elfy lasu, strzegące tajemnic pradawnych cywilizacji.")
+    ]
 
-            choice = input("Wybierz akcję (1-3): ").strip()
 
-            if choice == "1":
-                self.start_mission()
-            elif choice == "2":
-                self.rest()
-            elif choice == "3":
-                print("Zakończyłeś turę.")
-                break
-            else:
-                print("Nieprawidłowy wybór.\n")
+def choose_faction():
+    factions = get_factions()
 
-        if self.action_points <= 0:
-            print("Skończyły Ci się punkty akcji. Musisz odpocząć.")
+    print("=== WYBIERZ SWOJĄ FRAKCJĘ ===")
+    for idx, faction in enumerate(factions, start=1):
+        print(f"{idx}. {faction.name}")
 
-    def start_mission(self):
-        print("\n> Rozpocząłeś misję: Cień Nad Wioską")
-        print("Napotykasz dzikiego potwora – Wilczy Cień!")
-        print("🔥 Walka!")
-
-        wynik = input("Czy chcesz zaatakować? (t/n): ").strip().lower()
-        if wynik == "t":
-            print("Udało Ci się pokonać potwora! Zdobywasz nagrody.")
-            self.action_points -= 2
-        else:
-            print("Uciekasz z pola walki...")
-            self.action_points -= 1
-
-    def rest(self):
-        print("Odpoczywasz przy ognisku...")
-        self.action_points += 2
-        print(f"Odzyskano 2 punkty. Obecnie masz: {self.action_points}")
+    choice = input("Wybierz numer frakcji: ").strip()
+    try:
+        selected = factions[int(choice) - 1]
+        selected.display_info()
+        return selected
+    except (IndexError, ValueError):
+        print("Nieprawidłowy wybór.")
+        return None
