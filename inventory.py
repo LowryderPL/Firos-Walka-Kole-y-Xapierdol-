@@ -1,15 +1,13 @@
 inventory = {
-    "Złoto": 150,
-    "Mikstura leczenia": 3,
-    "Zwoje teleportacji": 1,
-    "Stalowy miecz": 1,
-    "Fragment mapy": 0
+    "Miecz Początkującego": 1,
+    "Zbroja Skórzana": 1,
+    "Mikstura Leczenia": 3
 }
 
 def show_inventory():
-    print("\n=== TWÓJ EKWIPUNEK ===")
+    print("\n=== EKWIPUNEK ===")
     if not inventory:
-        print("Ekwipunek jest pusty.")
-    else:
-        for item, amount in inventory.items():
-            print(f"{item}: {amount} szt.")
+        print("Twój ekwipunek jest pusty.")
+        return
+    for item, quantity in inventory.items():
+        print(f"{item} x{quantity}")
