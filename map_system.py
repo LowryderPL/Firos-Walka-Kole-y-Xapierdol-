@@ -1,8 +1,16 @@
-def display_world_map():
-    print("=== MAPA ŚWIATA ===")
-    print("1. Kyloun")
-    print("2. Drekkul Fells")
-    print("3. Shadoween")
-    print("4. Rain")
-    print("5. Misweth Thalin")
-    print("6. Empire of Thalin")
+
+class MapSystem:
+    def __init__(self):
+        self.regions = [
+            "Kyloun",
+            "Drekkul Fells",
+            "Shadoween",
+            "Rain",
+            "Misweth Thalin",
+            "Empire of Thalin"
+        ]
+
+    def display_map(self):
+        print("=== MAPA ŚWIATA ===")
+        for i, region in enumerate(self.regions, 1):
+            print(f"{i}. {region}")
