@@ -1,3 +1,5 @@
+from inventory import inventory
+
 class GameEngine:
     def __init__(self):
         self.action_points = 5
