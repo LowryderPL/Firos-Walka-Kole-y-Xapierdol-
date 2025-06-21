@@ -1,4 +1,4 @@
-from game_engine import GameEngine
+dfrom game_engine import GameEngine
 from menu import main_menu
 
 def main():
@@ -9,3 +9,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+    from map_system import MapSystem
+
+map_system = MapSystem()
+map_system.display_map()
