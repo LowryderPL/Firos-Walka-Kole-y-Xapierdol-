@@ -1,38 +1,40 @@
-class Faction:
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
+class FactionManager:
+    def __init__(self):
+        self.factions = {
+            "Cienie": {
+                "bonus": "+10% obrażeń nocą",
+                "talenty": ["Skrytobójstwo", "Iluzje", "Cisza"],
+            },
+            "Krwawe Ostrza": {
+                "bonus": "+20% obrażeń przy <50% HP",
+                "talenty": ["Szał", "Zemsta", "Wściekłość"],
+            },
+            "Lodowi Jeźdźcy": {
+                "bonus": "Zamrażają przeciwników na 1 turę co 5 ataków",
+                "talenty": ["Lodowy Mur", "Frostbite", "Spowolnienie"],
+            },
+            "Zakon Wiedzy": {
+                "bonus": "+15% moc czarów",
+                "talenty": ["Płonący Pocisk", "Bariery", "Teleportacja"],
+            },
+        }
+        self.player_faction = None
 
-    def display_info(self):
-        print(f"=== Frakcja: {self.name} ===")
-        print(self.description)
+    def choose_faction(self):
+        print("\n🏰 Wybierz frakcję:")
+        for idx, (name, data) in enumerate(self.factions.items(), 1):
+            print(f"{idx}. {name} - {data['bonus']}")
+        choice = input(">> ")
+        keys = list(self.factions.keys())
+        try:
+            self.player_faction = keys[int(choice) - 1]
+            print(f"\n✅ Wybrano frakcję: {self.player_faction}")
+        except (IndexError, ValueError):
+            print("❌ Nieprawidłowy wybór.")
+            self.choose_faction()
 
+    def get_faction_bonus(self):
+        return self.factions[self.player_faction]["bonus"] if self.player_faction else None
 
-def get_factions():
-    return [
-        Faction("The Eldrath", "Dawni magowie północy, władający starożytną magią."),
-        Faction("Valyria Confederacy", "Zjednoczenie wolnych miast pustyni – mistrzowie alchemii."),
-        Faction("Empire of Thalin", "Imperium ludzi – duma, potęga i rycerski honor."),
-        Faction("K'Yoloun", "Zimna, surowa kraina pamięci, pełna wojowników lodu."),
-        Faction("Drekbull Kells", "Wrzosowe góry zamieszkane przez nekromantów."),
-        Faction("Shadoween", "Ukryta frakcja skrytobójców, mistrzów cienia."),
-        Faction("Rain", "Magowie burz i deszczu, panujący nad pogodą."),
-        Faction("Miswevh Thalin", "Elfy lasu, strzegące tajemnic pradawnych cywilizacji.")
-    ]
-
-
-def choose_faction():
-    factions = get_factions()
-
-    print("=== WYBIERZ SWOJĄ FRAKCJĘ ===")
-    for idx, faction in enumerate(factions, start=1):
-        print(f"{idx}. {faction.name}")
-
-    choice = input("Wybierz numer frakcji: ").strip()
-    try:
-        selected = factions[int(choice) - 1]
-        selected.display_info()
-        return selected
-    except (IndexError, ValueError):
-        print("Nieprawidłowy wybór.")
-        return None
+    def get_faction_talents(self):
+        return self.factions[self.player_faction]["talenty"] if self.player_faction else []
