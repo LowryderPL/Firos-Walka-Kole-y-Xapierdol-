@@ -1,4 +1,5 @@
 import random
+from loot_system import loot_system
 
 class Player:
     def __init__(self, name, hp, attack, defense, skills=[]):
@@ -16,32 +17,40 @@ class Player:
     def is_alive(self):
         return self.hp > 0
 
+
 def simulate_battle(player, enemy):
-    print(f"\n=== Rozpoczyna się walka {player.name} vs {enemy.name} ===")
+    print(f"\n⚔️ Rozpoczyna się walka {player.name} vs {enemy.name}")
     round_num = 1
+
     while player.is_alive() and enemy.is_alive():
-        print(f"\n-- Tura {round_num} --")
+        print(f"\n🔁 Tura {round_num} —")
         dmg_to_enemy = enemy.take_damage(player.attack)
         dmg_to_player = player.take_damage(enemy.attack)
-        print(f"{player.name} zadaje {dmg_to_enemy} DMG | {enemy.name} HP: {enemy.hp}")
-        print(f"{enemy.name} zadaje {dmg_to_player} DMG | {player.name} HP: {player.hp}")
+
+        print(f"🗡️ {player.name} zadaje {dmg_to_enemy} DMG | {enemy.name} HP: {enemy.hp}")
+        print(f"🛡️ {enemy.name} zadaje {dmg_to_player} DMG | {player.name} HP: {player.hp}")
+
         round_num += 1
 
     if player.is_alive():
         print(f"\n🏆 {player.name} wygrał!")
+        print("🎁 Sprawdzanie łupów...")
+        loot_system.drop_loot(enemy.name)
     else:
-        print(f"\n💀 {enemy.name} pokonał {player.name}.")
+        print(f"\n💀 {enemy.name} pokonał {player.name}...")
+
 
 def duel_mode():
     print("\n=== Tryb Pojedynku PvP ===")
     name1 = input("Imię gracza 1: ")
     name2 = input("Imię gracza 2: ")
-    p1 = Player(name1, 120, 25, 10)
-    p2 = Player(name2, 100, 30, 5)
+    p1 = Player(name1, 120, 20, 5)
+    p2 = Player(name2, 130, 18, 8)
     simulate_battle(p1, p2)
 
+
 def boss_fight_mode():
-    print("\n=== Tryb PvE: Walka z Bossem ===")
+    print("\n=== Walka z Bossem ===")
     name = input("Twoje imię: ")
     player = Player(name, 150, 28, 12)
     boss = Player("Król Czaszek", 250, 35, 10)
