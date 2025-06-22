@@ -1,34 +1,37 @@
 class Creature:
-    def __init__(self, name, hp, damage, loot, rarity, description):
+    def __init__(self, name, level, health, attack, rarity, loot):
         self.name = name
-        self.hp = hp
-        self.damage = damage
-        self.loot = loot
-        self.rarity = rarity
-        self.description = description
+        self.level = level
+        self.health = health
+        self.attack = attack
+        self.rarity = rarity  # 'powszechny', 'rzadki', 'epicki', 'legendarny'
+        self.loot = loot      # np. {"Ząb Wilka": 1, "Złoto": 50}
 
-    def show_info(self):
-        print(f"\n🗡️ {self.name} [{self.rarity}]")
-        print(f"HP: {self.hp} | Obrażenia: {self.damage}")
-        print(f"Opis: {self.description}")
-        print(f"Drop: {', '.join(self.loot)}")
+    def __str__(self):
+        return f"{self.name} (Lvl {self.level}) – HP: {self.health}, ATK: {self.attack}, Rzadkość: {self.rarity}"
 
-def get_bestiary():
-    return [
-        Creature("Wilk z Cienia", 80, 12, ["Skóra Wilka", "Ząb Cienia"], "Zwykły", "Dziki i szybki, unika światła."),
-        Creature("Topielec", 120, 15, ["Oślizgłe Błoto", "Ząb"], "Rzadki", "Bestia z bagien, wyciąga żywych pod wodę."),
-        Creature("Upiorna Wiedźma", 160, 25, ["Zioła Rytualne", "Runa Krwi"], "Epicki", "Szepcze do umysłów wojowników."),
-        Creature("Strażnik Krypty", 200, 30, ["Kość Bohatera", "Klejnot Cienia"], "Unikalny", "Nieumarły rycerz, broni starożytnego grobowca."),
-        Creature("Władca Smoków", 500, 60, ["Serce Smoka", "Korona Popiołów", "Artefakt Ognia"], "Legendarny", "Potężny smok, kontrolujący żywioł ognia."),
-    ]
+class Bestiary:
+    def __init__(self):
+        self.creatures = []
 
-def show_bestiary():
-    bestiary = get_bestiary()
-    print("\n=== Bestiariusz Świata Firos ===")
-    for idx, monster in enumerate(bestiary, 1):
-        print(f"{idx}. {monster.name} ({monster.rarity})")
-    choice = input("Wybierz numer, aby zobaczyć szczegóły: ").strip()
-    try:
-        bestiary[int(choice)-1].show_info()
-    except:
-        print("Nieprawidłowy wybór.")
+    def add_creature(self, creature):
+        self.creatures.append(creature)
+        print(f"📚 Dodano do bestiariusza: {creature.name}")
+
+    def list_creatures(self):
+        print("\n=== Bestiariusz ===")
+        if not self.creatures:
+            print("Brak wpisów.")
+            return
+        for i, c in enumerate(self.creatures, 1):
+            print(f"{i}. {c}")
+
+    def find_by_level(self, min_lvl, max_lvl):
+        return [c for c in self.creatures if min_lvl <= c.level <= max_lvl]
+
+# Przykład testowy:
+if __name__ == "__main__":
+    bestiary = Bestiary()
+    bestiary.add_creature(Creature("Wilk", 2, 30, 5, "powszechny", {"Skóra Wilka": 1, "Złoto": 10}))
+    bestiary.add_creature(Creature("Upiór Cienia", 7, 120, 18, "epicki", {"Ektoplazma": 1, "Mroczny Kamień": 1}))
+    bestiary.list_creatures()
