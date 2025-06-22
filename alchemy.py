@@ -4,41 +4,40 @@ class Ingredient:
         self.rarity = rarity
 
 class Potion:
-    def __init__(self, name, ingredients, effect):
+    def __init__(self, name, ingredients, effect, description):
         self.name = name
         self.ingredients = ingredients
         self.effect = effect
+        self.description = description
 
-    def brew(self):
-        print(f"\nZwarzyłeś miksturę: {self.name}")
-        print(f"Składniki: {', '.join(ing.name for ing in self.ingredients)}")
+    def show_info(self):
+        print(f"\n🧪 {self.name}")
         print(f"Efekt: {self.effect}")
-
-def get_ingredients():
-    return [
-        Ingredient("Ziele Ghula", "Rzadki"),
-        Ingredient("Korzeń Mandragory", "Pospolity"),
-        Ingredient("Krew Wilkołaka", "Epicki"),
-        Ingredient("Oko Harpii", "Rzadki"),
-        Ingredient("Pazur Bazyliszka", "Legendarny"),
-    ]
+        print(f"Składniki: {', '.join(self.ingredients)}")
+        print(f"Opis: {self.description}")
 
 def get_potions():
-    ing = get_ingredients()
     return [
-        Potion("Eliksir Szału", [ing[0], ing[1]], "Zwiększa atak o 20% na 3 tury."),
-        Potion("Mikstura Cienia", [ing[3], ing[1]], "Zwiększa szansę na unik o 30%."),
-        Potion("Krew Nocy", [ing[2], ing[4]], "Natychmiast zadaje 50 obrażeń."),
+        Potion("Eliksir Życia", ["Zioło Miłości", "Krew Trolla"], "+50 HP", "Przywraca zdrowie na polu bitwy."),
+        Potion("Mikstura Cienia", ["Czarna Orchidea", "Proch Nocy"], "+25 do skradania", "Umożliwia niezauważone przejścia."),
+        Potion("Napój Furii", ["Serce Smoka", "Ząb Wilkołaka"], "+40 DMG na 3 tury", "Rytualny napój barbarzyńców."),
+        Potion("Mikstura Mrozu", ["Lód Wieczności", "Oko Bazyliszka"], "Zamraża przeciwnika na 1 turę", "Magiczny eliksir używany w starożytnych bitwach."),
     ]
 
-def brew_potion():
+def brew_potion(selected_ingredients):
     potions = get_potions()
-    print("\n=== Kocioł Alchemiczny ===")
-    for idx, potion in enumerate(potions, 1):
-        print(f"{idx}. {potion.name} – {potion.effect}")
-    choice = input("\nWybierz numer mikstury do stworzenia: ").strip()
+    for p in potions:
+        if set(p.ingredients) == set(selected_ingredients):
+            return p
+    return None
+
+def show_alchemy_lab():
+    print("\n🔬 Witamy w Laboratorium Alchemii")
+    potions = get_potions()
+    for i, p in enumerate(potions, 1):
+        print(f"{i}. {p.name} - {p.effect}")
+    choice = input("Wybierz miksturę, by zobaczyć szczegóły: ")
     try:
-        selected = potions[int(choice)-1]
-        selected.brew()
+        potions[int(choice)-1].show_info()
     except:
-        print("Nieprawidłowy wybór.")
+        print("Niepoprawny wybór.")
