@@ -1,26 +1,35 @@
-class Map:
-    def __init__(self):
-        self.current_region = "Początkowa Kraina"
-        self.regions = {
-            "Początkowa Kraina": {"frakcja": "Neutralna", "odkryta": True},
-            "Ruiny Cienia": {"frakcja": "Cienie", "odkryta": False},
-            "Ziemie Krwi": {"frakcja": "Krwawe Ostrza", "odkryta": False},
-            "Wieczna Zmarzlina": {"frakcja": "Lodowi Jeźdźcy", "odkryta": False},
-            "Twierdza Magów": {"frakcja": "Zakon Wiedzy", "odkryta": False}
-        }
+class Faction:
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
 
-    def display_starting_area(self):
-        print(f"\n🗺️ Rozpoczynasz w: {self.current_region}")
-        self.show_current_region()
+    def display_info(self):
+        print(f"\n=== Frakcja: {self.name} ===")
+        print(self.description)
 
-    def show_current_region(self):
-        print(f"\n📍 Region: {self.current_region}")
-        info = self.regions[self.current_region]
-        print(f"⚔️ Kontrola frakcji: {info['frakcja']}")
-        print(f"👁️ Odkryty: {'Tak' if info['odkryta'] else 'Nie'}")
+def get_factions():
+    return [
+        Faction("The Eldrath", "Dawni magowie północy, władający starożytną magią."),
+        Faction("Valyria Confederacy", "Zjednoczenie wolnych miast pustyni – mistrzowie alchemii."),
+        Faction("Empire of Thalin", "Imperium ludzi – duma, potęga i rycerski honor."),
+        Faction("K’Yoloun", "Zimna, surowa kraina pamięci, pełna wojowników lodu."),
+        Faction("Drekbull Fells", "Wrogoce góry zamieszkałe przez nekromantów."),
+        Faction("Shadowen", "Ukryta frakcja skrytobójców, mistrzów cienia."),
+        Faction("Rain", "Magowie burz i deszczu, panujący nad pogodą."),
+        Faction("Miswehh Thalin", "Elfy lasu, strzegące tajemnic pradawnych cywilizacji.")
+    ]
 
-    def show(self):
-        print("\n🌍 Mapa Świata FIROS:")
-        for region, info in self.regions.items():
-            odkryta = "✅" if info["odkryta"] else "❌"
-            print(f" - {region} [{info['frakcja']}] - {odkryta}")
+def choose_faction():
+    factions = get_factions()
+    print("\n=== WYBIERZ SWOJĄ FRAKCJĘ ===")
+    for idx, faction in enumerate(factions, start=1):
+        print(f"{idx}. {faction.name}")
+    
+    choice = input("Wybierz numer frakcji: ").strip()
+    try:
+        selected = factions[int(choice) - 1]
+        selected.display_info()
+        return selected
+    except (IndexError, ValueError):
+        print("Nieprawidłowy wybór.")
+        return None
