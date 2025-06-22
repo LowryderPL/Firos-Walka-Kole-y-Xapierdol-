@@ -1,15 +1,23 @@
-from game_engine import GameEngine
-from map_system import Map
-from faction import FactionManager
-from inventory import Inventory
-from quests import QuestLog
-from bestiary import Bestiary
-from sqlite_db import DBHandler
+from battle_system import duel_mode, boss_fight_mode
 
-def start_game():
-    print("🎮 Witaj w świecie Firos: Magic & Magic!")
-    engine = GameEngine()
-    engine.run()
+def main():
+    while True:
+        print("\n=== Firos: Magic & Magic ===")
+        print("1. Walka PvP (Pojedynek)")
+        print("2. Walka z Bossem")
+        print("3. Wyjście")
+
+        choice = input("Wybierz opcję: ")
+
+        if choice == "1":
+            duel_mode()
+        elif choice == "2":
+            boss_fight_mode()
+        elif choice == "3":
+            print("Do zobaczenia w Świecie Firos!")
+            break
+        else:
+            print("Nieprawidłowy wybór. Spróbuj ponownie.")
 
 if __name__ == "__main__":
-    start_game()
+    main()
