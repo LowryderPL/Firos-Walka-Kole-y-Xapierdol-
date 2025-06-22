@@ -1,34 +1,46 @@
 class Spell:
-    def __init__(self, name, effect, cost):
+    def __init__(self, name, cost, description):
         self.name = name
-        self.effect = effect
-        self.cost = cost
+        self.cost = cost  # koszt w punktach many
+        self.description = description
 
     def cast(self):
-        print(f"\n>> Rzucasz zaklęcie: {self.name}")
-        print(f"Efekt: {self.effect}")
-        print(f"Koszt many: {self.cost} 🪄")
+        print(f"\nRzucasz zaklęcie: {self.name}!")
+        print(self.description)
+        print(f"Koszt many: {self.cost}")
 
-def get_spellbook():
-    return [
-        Spell("Płomień Igni", "Zadaje 30 obrażeń ognistych.", 5),
-        Spell("Tarcza Quen", "Pochłania następny atak.", 4),
-        Spell("Zamrożenie Aard", "Zatrzymuje wroga na 1 turę.", 6),
-        Spell("Zdrada Axii", "Kontrolujesz umysł przeciwnika przez 1 turę.", 8),
-        Spell("Oczyszczenie Yrden", "Zmniejsza odporność wroga na magię.", 7),
-        Spell("Uzdrowienie Natury", "Przywraca 40 punktów życia.", 6),
-        Spell("Więzy Krwi", "Poświęć 20 HP, by zadać 40 obrażeń.", 0),
-    ]
+class Spellbook:
+    def __init__(self):
+        self.spells = [
+            Spell("Ognista Kula", 10, "Zadaje 30 pkt obrażeń wszystkim wrogom."),
+            Spell("Leczenie", 5, "Przywraca 20 pkt zdrowia."),
+            Spell("Lodowy Pocisk", 8, "Spowalnia i rani przeciwnika."),
+        ]
 
-def use_spell():
-    spellbook = get_spellbook()
-    print("\n=== TWOJA KSIĘGA ZAKLĘĆ ===")
-    for idx, spell in enumerate(spellbook, start=1):
-        print(f"{idx}. {spell.name} (Koszt: {spell.cost}) – {spell.effect}")
-    
-    choice = input("\nWybierz numer zaklęcia do rzucenia: ").strip()
-    try:
-        selected = spellbook[int(choice)-1]
-        selected.cast()
-    except (IndexError, ValueError):
-        print("Nieprawidłowy wybór zaklęcia.")
+    def list_spells(self):
+        print("\n=== TWOJA KSIĘGA ZAKLĘĆ ===")
+        for idx, spell in enumerate(self.spells, start=1):
+            print(f"{idx}. {spell.name} – koszt: {spell.cost} – {spell.description}")
+
+    def cast_spell(self, index):
+        try:
+            spell = self.spells[index - 1]
+            spell.cast()
+        except IndexError:
+            print("Nieprawidłowy numer zaklęcia.")
+
+    def learn_spell(self, spell):
+        self.spells.append(spell)
+        print(f"Nauczyłeś się nowego zaklęcia: {spell.name}!")
+
+# Instancja globalna
+spellbook = Spellbook()
+
+# Przykład użycia w grze
+def use_spellbook():
+    spellbook.list_spells()
+    choice = input("Wybierz numer zaklęcia do rzucenia: ").strip()
+    if choice.isdigit():
+        spellbook.cast_spell(int(choice))
+    else:
+        print("Nieprawidłowy wybór.")
