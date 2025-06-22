@@ -1,29 +1,29 @@
-def main_menu():
-    while True:
-        print("\n=== MENU GŁÓWNE ===")
-        print("1. Rozpocznij grę")
-        print("2. Wyświetl ekwipunek")
-        print("3. Pokaż mapę")
-        print("4. Wybierz frakcję")
-        print("5. Wyjście")
+from inventory import Inventory
+from faction import Faction
+from map_system import map_exploration
 
-        choice = input("Wybierz opcję (1-5): ").strip()
+def main_menu():
+    inventory = Inventory()
+    faction = Faction("Nieprzypisany", "Brak opisu.")  # Można nadpisać później wyborem gracza
+
+    while True:
+        print("\n=== GŁÓWNE MENU FIROS: MAGIC & MAGIC ===")
+        print("1. Rozpocznij eksplorację")
+        print("2. Pokaż ekwipunek")
+        print("3. Informacje o frakcji")
+        print("4. Wyjście z gry")
+
+        choice = input("Wybierz opcję (1-4): ").strip()
 
         if choice == "1":
-            print(">> Rozpoczynasz przygodę w świecie Firos...")
-            break  # Wyjście z menu, gra startuje
+            map_exploration()
         elif choice == "2":
-            from inventory import show_inventory
-            show_inventory()
+            inventory.display()
         elif choice == "3":
-            from map_system import MapSystem
-            map_system = MapSystem()
-            map_system.display_map()
+            print("\n--- Informacje o Twojej frakcji ---")
+            print(faction)
         elif choice == "4":
-            from faction import choose_faction
-            choose_faction()
-        elif choice == "5":
-            print(">> Do zobaczenia, bohaterze!")
-            exit()
+            print("Zamykanie gry... Do zobaczenia!")
+            break
         else:
             print("Nieprawidłowy wybór. Spróbuj ponownie.")
