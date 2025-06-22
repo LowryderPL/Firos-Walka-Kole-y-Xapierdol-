@@ -1,24 +1,15 @@
 from game_engine import GameEngine
-from menu import main_menu
-from map_system import MapSystem
-from faction import choose_faction
+from map_system import Map
+from faction import FactionManager
+from inventory import Inventory
+from quests import QuestLog
+from bestiary import Bestiary
+from sqlite_db import DBHandler
 
-def main():
-    print("=== FIROS: Magic & Magic ===")
-    main_menu()
-
-    # wybór frakcji
-    faction = choose_faction()
-    if faction is None:
-        return
-
-    # uruchomienie gry
+def start_game():
+    print("🎮 Witaj w świecie Firos: Magic & Magic!")
     engine = GameEngine()
     engine.run()
 
-    # wyświetlenie mapy
-    map_system = MapSystem()
-    map_system.display_map()
-
 if __name__ == "__main__":
-    main()
+    start_game()
