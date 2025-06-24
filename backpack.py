@@ -1,69 +1,57 @@
-# backpack.py – System przechowywania zwojów, składników i artefaktów
-
-from scrolls import get_scrolls
-from inventory import Item
+# backpack.py - Zarządzanie plecakiem gracza w grze Firos: Magic & Magic
 
 class Backpack:
     def __init__(self):
-        self.scrolls = []      # lista zwojów
-        self.ingredients = []  # lista składników
-        self.artifacts = []    # lista przedmiotów (Item)
+        self.ingredients = []
+        self.artifacts = []
+        self.scrolls = []
+        self.items = []
+
+    def add_ingredient(self, ingredient):
+        self.ingredients.append(ingredient)
+        print(f"🔹 Dodano składnik: {ingredient}")
+
+    def add_artifact(self, artifact):
+        self.artifacts.append(artifact)
+        print(f"✨ Dodano artefakt: {artifact}")
 
     def add_scroll(self, scroll):
         self.scrolls.append(scroll)
-        print(f"📜 Dodano zwój: {scroll.name}")
+        print(f"📜 Dodano zwój: {scroll}")
 
-    def add_ingredient(self, name):
-        self.ingredients.append(name)
-        print(f"🌿 Dodano składnik: {name}")
+    def add_item(self, item):
+        self.items.append(item)
+        print(f"🎒 Dodano przedmiot: {item}")
 
-    def add_artifact(self, item: Item):
-        self.artifacts.append(item)
-        print(f"🗡️ Dodano artefakt: {item.name} ({item.rarity})")
+    def has_ingredients(self, required):
+        return all(req in self.ingredients for req in required)
 
-    def show(self):
-        print("\n🎒 ZAWARTOŚĆ PLECAKA")
+    def remove_ingredients(self, ingredients):
+        for ing in ingredients:
+            if ing in self.ingredients:
+                self.ingredients.remove(ing)
 
-        print("\n📜 Zwoje:")
-        if self.scrolls:
-            for i, s in enumerate(self.scrolls, 1):
-                status = "✅" if s.used else "❌"
-                print(f"{i}. {status} {s.name} – {s.description}")
-        else:
-            print("Brak zwojów.")
+    def list_all(self):
+        print("\n📦 Zawartość plecaka:")
+        print(f"Składniki ({len(self.ingredients)}): {', '.join(self.ingredients) if self.ingredients else 'brak'}")
+        print(f"Artefakty ({len(self.artifacts)}): {', '.join(self.artifacts) if self.artifacts else 'brak'}")
+        print(f"Zwoje ({len(self.scrolls)}): {', '.join(self.scrolls) if self.scrolls else 'brak'}")
+        print(f"Przedmioty ({len(self.items)}): {', '.join(self.items) if self.items else 'brak'}")
 
-        print("\n🌿 Składniki:")
-        if self.ingredients:
-            for i, ing in enumerate(self.ingredients, 1):
-                print(f"{i}. {ing}")
-        else:
-            print("Brak składników.")
+    def show_inventory_summary(self):
+        print("\n📊 Podsumowanie wyposażenia gracza:")
+        print(f"- Składniki: {len(self.ingredients)}")
+        print(f"- Artefakty: {len(self.artifacts)}")
+        print(f"- Zwoje: {len(self.scrolls)}")
+        print(f"- Przedmioty: {len(self.items)}")
 
-        print("\n🗡️ Artefakty:")
-        if self.artifacts:
-            for i, art in enumerate(self.artifacts, 1):
-                print(f"{i}. {art.name} ({art.rarity}) – Moc: {art.power}")
-        else:
-            print("Brak artefaktów.")
-
-# Przykład testowy
+# Przykład użycia (tylko do testów lokalnych)
 if __name__ == "__main__":
-    from scrolls import Scroll
-    from spellbook import Spell
-
-    backpack = Backpack()
-
-    # Dodaj przykładowe zwój
-    example_scroll = Scroll("Zwój Ognistej Kuli", Spell("Ognista Kula", 10, "Zadaje 30 dmg"), "Pergamin z płomiennym symbolem.")
-    backpack.add_scroll(example_scroll)
-
-    # Dodaj składniki
-    backpack.add_ingredient("ziele")
-    backpack.add_ingredient("popiół")
-
-    # Dodaj artefakt
-    item = Item(name="Amulet Ognia", rarity="epic", power=7, slot="artifact")
-    backpack.add_artifact(item)
-
-    # Pokaż całość
-    backpack.show()
+    bp = Backpack()
+    bp.add_ingredient("ziele")
+    bp.add_ingredient("popiół")
+    bp.add_artifact("Pierścień Mocy")
+    bp.add_scroll("Zwój Ognia")
+    bp.add_item("Miecz Żołnierza")
+    bp.list_all()
+    bp.show_inventory_summary()
