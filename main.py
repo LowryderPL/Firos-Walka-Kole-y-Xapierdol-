@@ -1,23 +1,35 @@
-from battle_system import duel_mode, boss_fight_mode
+# main.py – Główna pętla startowa gry Firos: Magic & Magic
 
-def main():
-    while True:
-        print("\n=== Firos: Magic & Magic ===")
-        print("1. Walka PvP (Pojedynek)")
-        print("2. Walka z Bossem")
-        print("3. Wyjście")
+from menu import show_main_menu
+from backpack import Backpack
+from spellbook import Spellbook
+from mana_system import ManaManager
+from xp_system import PlayerStats
+from quests import QuestLog
+from alchemy import alchemy  # gotowy obiekt z recepturami
 
-        choice = input("Wybierz opcję: ")
+# Inicjalizacja gracza
+player_name = input("🧙 Podaj imię swojego bohatera: ").strip()
+if not player_name:
+    player_name = "Bezimienny"
 
-        if choice == "1":
-            duel_mode()
-        elif choice == "2":
-            boss_fight_mode()
-        elif choice == "3":
-            print("Do zobaczenia w Świecie Firos!")
-            break
-        else:
-            print("Nieprawidłowy wybór. Spróbuj ponownie.")
+print(f"\n🎮 Witaj, {player_name}, w świecie Firos: Magic & Magic!")
 
-if __name__ == "__main__":
-    main()
+# Tworzymy wszystkie systemy gracza
+player_stats = PlayerStats(player_name)
+player_backpack = Backpack()
+player_spellbook = Spellbook()
+mana = ManaManager(max_mana=50)
+quest_log = QuestLog()
+
+# Główna pętla gry
+while True:
+    show_main_menu(
+        player_name=player_name,
+        stats=player_stats,
+        backpack=player_backpack,
+        spellbook=player_spellbook,
+        mana=mana,
+        quest_log=quest_log,
+        alchemy=alchemy
+    )
