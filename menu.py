@@ -1,46 +1,49 @@
-# menu.py – główne menu gry Firos: Magic & Magic (rozszerzone o alchemię, plecak i bestiariusz)
+# menu.py – Główne menu gry Firos: Magic & Magic
 
-from inventory import Inventory
-from faction import Faction
-from map_system import map_exploration
-from alchemy import alchemy_interface
-from backpack import Backpack
-from viev_bestiary import show_all_creatures
+from battle_system import start_battle
+from exploration import explore
+from dungeon import enter_dungeon
+from spellbook import show_spells
+from quests import show_quests
+from backpack import show_backpack
+from alchemy import show_alchemy_menu
 
-# Plecak globalny (dzielony z alchemią, jeśli trzeba)
-player_inventory = Inventory()
-player_faction = Faction("Nieprzypisany", "Brak opisu.")
-player_backpack = Backpack()  # osobny widok (niezależny od alchemii, ale można połączyć)
-
-def main_menu():
+def show_main_menu(player_name, stats, backpack, spellbook, mana, quest_log, alchemy):
     while True:
-        print("\n=== GŁÓWNE MENU FIROS: MAGIC & MAGIC ===")
-        print("1. 🌍 Eksploracja mapy")
-        print("2. 🎒 Plecak (scrolls, składniki, artefakty)")
-        print("3. ⚗️ Alchemia (stół alchemiczny)")
-        print("4. 📚 Bestiariusz")
-        print("5. 🏹 Frakcja")
-        print("6. ❌ Wyjście z gry")
+        print(f"\n🎮 {player_name}, wybierz jedną z opcji:")
+        print("1. ⚔️  Walka z potworem")
+        print("2. 🌲 Eksploracja świata")
+        print("3. 📜 Księga Zaklęć")
+        print("4. 🧪 Alchemia i mikstury")
+        print("5. 🎒 Plecak i składniki")
+        print("6. 🧠 Statystyki i EXP")
+        print("7. 📖 Dziennik misji")
+        print("8. 💧 Zarządzanie maną")
+        print("9. 💀 Wejście do lochu")
+        print("0. ❌ Wyjście z gry")
 
-        choice = input("Wybierz opcję (1-6): ").strip()
+        choice = input("➤ Twój wybór: ").strip()
 
         if choice == "1":
-            map_exploration()
+            start_battle(stats, backpack)
         elif choice == "2":
-            player_backpack.show()
+            explore()
         elif choice == "3":
-            alchemy_interface()
+            show_spells(spellbook, mana)
         elif choice == "4":
-            show_all_creatures()
+            show_alchemy_menu(alchemy, backpack)
         elif choice == "5":
-            print("\n--- Informacje o frakcji ---")
-            print(player_faction)
+            show_backpack(backpack)
         elif choice == "6":
-            print("👋 Do zobaczenia w Świecie Firos!")
+            stats.show_stats()
+        elif choice == "7":
+            show_quests(quest_log)
+        elif choice == "8":
+            print(f"\n🔮 Aktualna mana: {mana.current}/{mana.max}")
+        elif choice == "9":
+            enter_dungeon()
+        elif choice == "0":
+            print("👋 Zakończono grę. Do zobaczenia!")
             break
         else:
-            print("❌ Nieprawidłowy wybór.")
-
-# Uruchomienie głównego menu
-if __name__ == "__main__":
-    main_menu()
+            print("❗ Nieprawidłowy wybór. Spróbuj ponownie.")
