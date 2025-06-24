@@ -1,4 +1,8 @@
-# alchemy.py – Firos: Magic & Magic
+# alchemy.py – Firos: Magic & Magic (rozszerzony o system plecaka i zwoje)
+
+from scrolls import Scroll
+from spellbook import Spell
+from backpack import Backpack
 
 class Recipe:
     def __init__(self, name, ingredients, result, description, category="mikstura"):
@@ -11,6 +15,7 @@ class Recipe:
 class Alchemy:
     def __init__(self):
         self.recipes = []
+        self.backpack = Backpack()
 
     def add_recipe(self, recipe):
         self.recipes.append(recipe)
@@ -27,15 +32,29 @@ class Alchemy:
             if sorted(recipe.ingredients) == sorted(ingredients):
                 print(f"\n🧪 Udało się stworzyć: {recipe.result}!")
                 print(f"Opis: {recipe.description}")
+
+                # jeśli to zwój, dodaj do plecaka jako Scroll
+                if recipe.category == "zwój":
+                    spell_map = {
+                        "scroll_fireball": Spell("Ognista Kula", 10, "Zadaje 30 obrażeń."),
+                        "scroll_frostblast": Spell("Lodowy Wybuch", 8, "Spowalnia i rani przeciwnika."),
+                        "scroll_teleport": Spell("Teleportacja", 15, "Teleportuje gracza do miasta.")
+                    }
+                    spell = spell_map.get(recipe.result)
+                    if spell:
+                        new_scroll = Scroll(recipe.name, spell, recipe.description)
+                        self.backpack.add_scroll(new_scroll)
+                elif recipe.category == "mikstura":
+                    self.backpack.add_ingredient(recipe.result)  # tymczasowo jako składnik
                 return recipe.result
+
         print("❌ Nie udało się stworzyć mikstury. Sprawdź składniki.")
         return None
 
-# Globalna instancja
+# === INSTANCJA ===
 alchemy = Alchemy()
 
-# === 🔮 LISTA PRZYKŁADOWYCH RECEPTUR ===
-
+# === RECEPTURY ===
 alchemy.add_recipe(Recipe(
     name="Mikstura Leczenia",
     ingredients=["ziele", "grzyb", "woda"],
@@ -56,34 +75,27 @@ alchemy.add_recipe(Recipe(
     name="Zwój Lodowego Wybuchu",
     ingredients=["lód", "popiół", "pergamin"],
     result="scroll_frostblast",
-    description="Uczy zaklęcia Lodowy Wybuch (spowalnia i rani).",
+    description="Uczy zaklęcia Lodowy Wybuch.",
     category="zwój"
-))
-
-alchemy.add_recipe(Recipe(
-    name="Mikstura Mutacji",
-    ingredients=["krew", "cień", "ziele"],
-    result="mikstura_mutacji",
-    description="Tymczasowo zwiększa siłę, ale obniża obronę.",
-    category="mutacja"
 ))
 
 alchemy.add_recipe(Recipe(
     name="Zwój Teleportacji",
     ingredients=["popiół", "runiczny_papier", "woda"],
     result="scroll_teleport",
-    description="Teleportuje gracza do ostatniego miasta.",
+    description="Teleportuje gracza do miasta.",
     category="zwój"
 ))
 
-# === Interfejs użytkownika ===
+# === INTERFEJS ===
 def alchemy_interface():
-    print("\n🔬 Masz dostęp do stołu alchemicznego.")
+    print("\n🔬 Stół alchemiczny")
     alchemy.list_recipes()
-    chosen = input("Podaj składniki oddzielone przecinkiem (np. ziele,woda,grzyb): ").strip()
+    chosen = input("Podaj składniki oddzielone przecinkiem: ").strip()
     ingredients = [i.strip().lower() for i in chosen.split(",")]
     alchemy.craft(ingredients)
+    alchemy.backpack.show()
 
-# Testowy interfejs (do uruchomienia oddzielnie)
+# Test
 if __name__ == "__main__":
     alchemy_interface()
