@@ -1,35 +1,64 @@
-# core/replay.py
+# replay.py — System powtórek FIROS
 
-import time
+import json
+import os
+import datetime
 
 class ReplayManager:
-    def __init__(self):
-        self.moves = []
-        self.replaying = False
+    def __init__(self, folder="replays"):
+        self.folder = folder
+        self.recording = []
+        self.playback = []
+        self.playing = False
         self.index = 0
 
-    def record_move(self, move_data):
-        """Zapisuje ruch w formie słownika."""
-        self.moves.append(move_data)
+        if not os.path.exists(self.folder):
+            os.makedirs(self.folder)
 
-    def start(self, board):
-        """Rozpoczyna odtwarzanie zresetowanego stanu planszy."""
-        if not self.moves:
-            print("Brak ruchów do odtworzenia.")
+    def record_action(self, action_data):
+        if isinstance(action_data, dict):
+            timestamp = datetime.datetime.now().isoformat()
+            self.recording.append({"timestamp": timestamp, "action": action_data})
+
+    def save(self, match_id=None):
+        if not self.recording:
             return
-        self.replaying = True
+
+        match_id = match_id or datetime.datetime.now().strftime("match_%Y%m%d_%H%M%S")
+        filepath = os.path.join(self.folder, f"{match_id}.replay.json")
+
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(self.recording, f, indent=4)
+
+        self.recording = []  # Clear after saving
+
+    def load(self, filename):
+        filepath = os.path.join(self.folder, filename)
+        if not os.path.exists(filepath):
+            print(f"[Replay] Nie znaleziono pliku: {filename}")
+            return
+
+        with open(filepath, "r", encoding="utf-8") as f:
+            self.playback = json.load(f)
+
+        self.playing = True
         self.index = 0
-        board.reset_board()
+        print(f"[Replay] Załadowano powtórkę: {filename}")
 
-    def update(self, screen=None):
-        """Odtwarza ruchy krok po kroku."""
-        if self.replaying and self.index < len(self.moves):
-            move = self.moves[self.index]
-            self._apply_move(move)
-            self.index += 1
-            time.sleep(0.5)  # tempo odtwarzania
-        elif self.index >= len(self.moves):
-            self.replaying = False
+    def update(self, display_callback):
+        if not self.playing or self.index >= len(self.playback):
+            return
 
-    def _apply_move(self, move):
-        # Przykład struktury ruchu: {"from": (x1, y1), "to": (x2, y2),
+        action = self.playback[self.index]["action"]
+        display_callback(action)
+        self.index += 1
+
+        if self.index >= len(self.playback):
+            self.playing = False
+            print("[Replay] Powtórka zakończona")
+
+    def list_replays(self):
+        return [f for f in os.listdir(self.folder) if f.endswith(".replay.json")]
+
+    def is_playing(self):
+        return self.playing
