@@ -1,64 +1,53 @@
-# replay.py — System powtórek FIROS
+import json import os from datetime import datetime
 
-import json
-import os
-import datetime
+class ReplayManager: def init(self, replay_dir="replays"): self.replay_data = [] self.replay_dir = replay_dir self.current_replay = [] if not os.path.exists(replay_dir): os.makedirs(replay_dir)
 
-class ReplayManager:
-    def __init__(self, folder="replays"):
-        self.folder = folder
-        self.recording = []
-        self.playback = []
-        self.playing = False
-        self.index = 0
+def record_action(self, player_id, action_type, details):
+    event = {
+        "timestamp": datetime.now().isoformat(),
+        "player": player_id,
+        "action": action_type,
+        "details": details
+    }
+    self.current_replay.append(event)
 
-        if not os.path.exists(self.folder):
-            os.makedirs(self.folder)
+def save_replay(self, match_id=None):
+    if not self.current_replay:
+        return None
 
-    def record_action(self, action_data):
-        if isinstance(action_data, dict):
-            timestamp = datetime.datetime.now().isoformat()
-            self.recording.append({"timestamp": timestamp, "action": action_data})
+    if not match_id:
+        match_id = datetime.now().strftime("replay_%Y%m%d_%H%M%S")
 
-    def save(self, match_id=None):
-        if not self.recording:
-            return
+    filepath = os.path.join(self.replay_dir, f"{match_id}.json")
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(self.current_replay, f, indent=2)
+    self.current_replay = []
+    return filepath
 
-        match_id = match_id or datetime.datetime.now().strftime("match_%Y%m%d_%H%M%S")
-        filepath = os.path.join(self.folder, f"{match_id}.replay.json")
+def load_replay(self, match_id):
+    filepath = os.path.join(self.replay_dir, f"{match_id}.json")
+    if os.path.exists(filepath):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            self.replay_data = json.load(f)
+        return True
+    return False
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(self.recording, f, indent=4)
+def get_events(self):
+    return self.replay_data
 
-        self.recording = []  # Clear after saving
+def display_replay(self):
+    if not self.replay_data:
+        print("Brak powtórki do wyświetlenia.")
+        return
 
-    def load(self, filename):
-        filepath = os.path.join(self.folder, filename)
-        if not os.path.exists(filepath):
-            print(f"[Replay] Nie znaleziono pliku: {filename}")
-            return
+    print("=== Powtórka rozgrywki ===")
+    for event in self.replay_data:
+        timestamp = event.get("timestamp")
+        player = event.get("player")
+        action = event.get("action")
+        details = event.get("details")
+        print(f"[{timestamp}] Gracz {player} wykonał akcję '{action}': {details}")
 
-        with open(filepath, "r", encoding="utf-8") as f:
-            self.playback = json.load(f)
+def list_replays(self):
+    return [f for f in os.listdir(self.replay_dir) if f.endswith(".json")]
 
-        self.playing = True
-        self.index = 0
-        print(f"[Replay] Załadowano powtórkę: {filename}")
-
-    def update(self, display_callback):
-        if not self.playing or self.index >= len(self.playback):
-            return
-
-        action = self.playback[self.index]["action"]
-        display_callback(action)
-        self.index += 1
-
-        if self.index >= len(self.playback):
-            self.playing = False
-            print("[Replay] Powtórka zakończona")
-
-    def list_replays(self):
-        return [f for f in os.listdir(self.folder) if f.endswith(".replay.json")]
-
-    def is_playing(self):
-        return self.playing
