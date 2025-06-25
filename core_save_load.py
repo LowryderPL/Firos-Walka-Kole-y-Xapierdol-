@@ -1,43 +1,39 @@
-# core/save_load.py — system zapisu i wczytywania stanu gry (Szachy FIROS)
+# core/save_load.py
 
 import json
-import os
+from datetime import datetime
 
 class SaveSystem:
-    SAVE_PATH = "saves"
+    def __init__(self, path="savegame.json"):
+        self.path = path
 
-    def __init__(self):
-        if not os.path.exists(self.SAVE_PATH):
-            os.makedirs(self.SAVE_PATH)
+    def save(self, board_state):
+        try:
+            data = {
+                "timestamp": datetime.utcnow().isoformat(),
+                "board": board_state.export_state(),
+                "players": board_state.export_players(),
+                "chat": board_state.chat.export(),
+                "spells": board_state.spells.export(),
+                "turn": board_state.current_turn
+            }
 
-    def save(self, board, filename="autosave.json"):
-        data = {
-            "turn": board.current_turn,
-            "pieces": [
-                {
-                    "type": piece.type,
-                    "team": piece.team,
-                    "position": piece.position,
-                    "status": piece.status
-                } for piece in board.pieces
-            ]
-        }
-        with open(os.path.join(self.SAVE_PATH, filename), "w") as f:
-            json.dump(data, f, indent=4)
+            with open(self.path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+            print("✅ Gra zapisana.")
+        except Exception as e:
+            print(f"❌ Błąd zapisu: {e}")
 
-    def load(self, board, filename="autosave.json"):
-        path = os.path.join(self.SAVE_PATH, filename)
-        if not os.path.exists(path):
-            print("Brak zapisu.")
-            return
-        with open(path, "r") as f:
-            data = json.load(f)
-            board.current_turn = data["turn"]
-            board.pieces.clear()
-            for p in data["pieces"]:
-                board.add_piece(
-                    piece_type=p["type"],
-                    team=p["team"],
-                    position=p["position"],
-                    status=p.get("status", None)
-                )
+    def load(self, board_state):
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            board_state.import_state(data["board"])
+            board_state.import_players(data["players"])
+            board_state.chat.import_data(data["chat"])
+            board_state.spells.import_data(data["spells"])
+            board_state.current_turn = data.get("turn", 0)
+            print("✅ Gra wczytana.")
+        except Exception as e:
+            print(f"❌ Błąd wczytywania: {e}")
