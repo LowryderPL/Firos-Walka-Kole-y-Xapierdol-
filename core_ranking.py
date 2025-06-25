@@ -1,44 +1,39 @@
-# core/ranking.py
+# core/save_load.py
 
-class PlayerRanking:
-    def __init__(self):
-        self.rankings = {}
+import json
+from datetime import datetime
 
-    def register_player(self, player_id, player_name):
-        if player_id not in self.rankings:
-            self.rankings[player_id] = {
-                "name": player_name,
-                "points": 1000,
-                "wins": 0,
-                "losses": 0,
-                "matches": 0,
+class SaveSystem:
+    def __init__(self, path="savegame.json"):
+        self.path = path
+
+    def save(self, board_state):
+        try:
+            data = {
+                "timestamp": datetime.utcnow().isoformat(),
+                "board": board_state.export_state(),
+                "players": board_state.export_players(),
+                "chat": board_state.chat.export(),
+                "spells": board_state.spells.export(),
+                "turn": board_state.current_turn
             }
 
-    def record_match(self, winner_id, loser_id):
-        if winner_id not in self.rankings or loser_id not in self.rankings:
-            return
+            with open(self.path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+            print("✅ Gra zapisana.")
+        except Exception as e:
+            print(f"❌ Błąd zapisu: {e}")
 
-        self.rankings[winner_id]["points"] += 25
-        self.rankings[winner_id]["wins"] += 1
-        self.rankings[winner_id]["matches"] += 1
+    def load(self, board_state):
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                data = json.load(f)
 
-        self.rankings[loser_id]["points"] = max(0, self.rankings[loser_id]["points"] - 15)
-        self.rankings[loser_id]["losses"] += 1
-        self.rankings[loser_id]["matches"] += 1
-
-    def get_top_players(self, limit=10):
-        return sorted(
-            self.rankings.items(),
-            key=lambda item: item[1]["points"],
-            reverse=True
-        )[:limit]
-
-    def get_player_stats(self, player_id):
-        return self.rankings.get(player_id, None)
-
-    def reset_rankings(self):
-        for player in self.rankings.values():
-            player["points"] = 1000
-            player["wins"] = 0
-            player["losses"] = 0
-            player["matches"] = 0
+            board_state.import_state(data["board"])
+            board_state.import_players(data["players"])
+            board_state.chat.import_data(data["chat"])
+            board_state.spells.import_data(data["spells"])
+            board_state.current_turn = data.get("turn", 0)
+            print("✅ Gra wczytana.")
+        except Exception as e:
+            print(f"❌ Błąd wczytywania: {e}")
