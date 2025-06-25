@@ -1,46 +1,57 @@
-guilds_gui.py – GUI dla systemu Gildii w grze FIROS
+guilds_gui.py — GUI do zarzadzania gildiami w grze Firos: Magic & Magic
 
-import pygame import sys from core.guilds import GuildManager
+import pygame import sys from guild_logic import GuildManager
 
-pygame.init() screen = pygame.display.set_mode((1280, 800)) pygame.display.set_caption("FIROS: Gildie") font = pygame.font.SysFont("timesnewroman", 24) clock = pygame.time.Clock()
+pygame.init() screen = pygame.display.set_mode((1280, 800)) pygame.display.set_caption("FIROS: Gildie") font = pygame.font.SysFont("timesnewroman", 28)
 
-WHITE = (255, 255, 255) BLACK = (0, 0, 0) GRAY = (180, 180, 180)
+Kolory
 
-manager = GuildManager()
+WHITE = (255, 255, 255) BLACK = (0, 0, 0) GREY = (80, 80, 80) BLUE = (50, 120, 200)
 
-selected_guild = None input_box = pygame.Rect(300, 100, 400, 40) input_text = "" input_active = False
+Inicjalizacja logiki gildi
 
-def draw_interface(): screen.fill(BLACK) title = font.render("Gildie FIROS - Zarządzanie", True, WHITE) screen.blit(title, (480, 20))
+guilds = GuildManager() selected_guild = None input_name = "" creating_guild = False
 
-# Gildie
-for idx, guild in enumerate(manager.guilds):
-    y = 160 + idx * 40
-    gtext = font.render(f"{guild.name} | Poziom: {guild.level} | Członkowie: {len(guild.members)}", True, GRAY if guild != selected_guild else WHITE)
-    screen.blit(gtext, (80, y))
+def draw_text(text, x, y, color=WHITE): label = font.render(text, True, color) screen.blit(label, (x, y))
 
-# Utwórz nową
-pygame.draw.rect(screen, WHITE if input_active else GRAY, input_box, 2)
-input_surface = font.render(input_text, True, WHITE)
-screen.blit(input_surface, (input_box.x + 10, input_box.y + 5))
+def draw_guild_menu(): screen.fill(BLACK) draw_text("Twoje Gildie:", 50, 50)
+
+y_offset = 100
+for guild in guilds.get_all_guilds():
+    draw_text(f"- {guild['name']} | Lv.{guild['level']} | Exp: {guild['exp']}", 60, y_offset)
+    y_offset += 40
+
+draw_text("[N] Nowa Gildia", 50, y_offset + 30)
+
+if creating_guild:
+    draw_text("Nazwa nowej gildii:", 50, y_offset + 90)
+    pygame.draw.rect(screen, GREY, (400, y_offset + 90, 300, 40))
+    draw_text(input_name, 410, y_offset + 95, BLUE)
+
 pygame.display.flip()
 
-running = True while running: draw_interface() for event in pygame.event.get(): if event.type == pygame.QUIT: running = False
+running = True clock = pygame.time.Clock()
 
-elif event.type == pygame.MOUSEBUTTONDOWN:
-        if input_box.collidepoint(event.pos):
-            input_active = True
-        else:
-            input_active = False
+while running: draw_guild_menu()
 
-    elif event.type == pygame.KEYDOWN and input_active:
-        if event.key == pygame.K_RETURN:
-            if input_text.strip():
-                manager.create_guild(input_text.strip(), "Player")  # tymczasowy lider
-                input_text = ""
-        elif event.key == pygame.K_BACKSPACE:
-            input_text = input_text[:-1]
-        else:
-            input_text += event.unicode
+for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+        guilds.save_guilds()
+        running = False
+
+    elif event.type == pygame.KEYDOWN:
+        if creating_guild:
+            if event.key == pygame.K_RETURN:
+                if input_name.strip():
+                    guilds.create_guild(input_name.strip())
+                    input_name = ""
+                    creating_guild = False
+            elif event.key == pygame.K_BACKSPACE:
+                input_name = input_name[:-1]
+            else:
+                input_name += event.unicode
+        elif event.key == pygame.K_n:
+            creating_guild = True
 
 clock.tick(30)
 
