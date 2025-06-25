@@ -17,7 +17,7 @@ def draw_spell_list(class_name, selected_index):
     screen.fill(BLACK)
     spells = spellbook.get_spells_for_class(class_name)
     title = big_font.render(f"Czary klasy: {class_name}", True, WHITE)
-    screen.blit(title, (WIDTH//2 - title.get_width()//2, 20))
+    screen.blit(title, (WIDTH // 2 - title.get_width() // 2, 20))
 
     for i, spell in enumerate(spells):
         color = (255, 215, 0) if i == selected_index else WHITE
@@ -34,7 +34,10 @@ def draw_spell_list(class_name, selected_index):
     pygame.display.flip()
 
 def main():
-    class_name = "Mag Ognia"  # <- tu możesz zmienić klasę do testu
+    print("Wybierz klasę gracza spośród:")
+    print(" - Wiedźmograd\n - Zjomistrz\n - Krwistostrzelec\n - Duszołowca")
+    print(" - Runokultan\n - Cierniojad\n - Żarogniew\n - Mgłomistrz")
+    class_name = input("Wpisz nazwę klasy gracza: ").strip()
     selected = 0
     clock = pygame.time.Clock()
 
