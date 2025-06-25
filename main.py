@@ -1,35 +1,35 @@
-main.py – uproszczony widok do telefonu
+# main.py – Główna pętla startowa gry Firos: Magic & Magic
 
-def wybierz_klase(): klasy = { "1": "Żarowid", "2": "Krwiścier", "3": "Wiedźcior", "4": "Mrokorzyt", "5": "Stryłecznik", "6": "Zielarzec", "7": "Snemistrz" }
+from menu import show_main_menu
+from backpack import Backpack
+from spellbook import Spellbook
+from mana_system import ManaManager
+from xp_system import PlayerStats
+from quests import QuestLog
+from alchemy import alchemy  # gotowy obiekt z recepturami
 
-print("Wybierz swoją klasę postaci:")
-for klucz, nazwa in klasy.items():
-    linia = klucz + ". " + nazwa
-    print(linia)
+# Inicjalizacja gracza
+player_name = input("🧙 Podaj imię swojego bohatera: ").strip()
+if not player_name:
+    player_name = "Bezimienny"
 
-wybor = input("Podaj numer klasy: ")
-wybrana = klasy.get(wybor, "Wiedźcior")
+print(f"\n🎮 Witaj, {player_name}, w świecie Firos: Magic & Magic!")
 
-print("\nTwoja postać to: ")
-print(wybrana)
-return wybrana
+# Tworzymy wszystkie systemy gracza
+player_stats = PlayerStats(player_name)
+player_backpack = Backpack()
+player_spellbook = Spellbook()
+mana = ManaManager(max_mana=50)
+quest_log = QuestLog()
 
-def start_gry(): print("\nWitaj w świecie FIROS!") imie = input("Podaj imię swojej postaci: ") klasa = wybierz_klase()
-
-postac = {
-    "nazwa": imie,
-    "klasa": klasa,
-    "poziom": 1,
-    "punkty_zdrowia": 100,
-    "mana": 50,
-    "ekwipunek": [],
-    "czary": []
-}
-
-print("\nGotowy do przygody:")
-print(postac["nazwa"] + " – " + postac["klasa"])
-
-return postac
-
-if name == "main": gracz = start_gry() # tu kontynuacja: menu, walka, mapa itd.
-
+# Główna pętla gry
+while True:
+    show_main_menu(
+        player_name=player_name,
+        stats=player_stats,
+        backpack=player_backpack,
+        spellbook=player_spellbook,
+        mana=mana,
+        quest_log=quest_log,
+        alchemy=alchemy
+    )
