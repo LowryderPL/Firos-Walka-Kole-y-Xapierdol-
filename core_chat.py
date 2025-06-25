@@ -1,33 +1,58 @@
-core_chat.py — System czatu dla Firos: Magic & Magic
+core_chat_system.py — Rozszerzony system czatu dla Szachów Królewskich FIROS
 
 import pygame
 
-class ChatSystem: def init(self, font=None, max_messages=10, quick_messages=None): self.messages = [] self.max_messages = max_messages self.font = font or pygame.font.SysFont("timesnewroman", 18) self.quick_messages = quick_messages or ["GG", "Dobra tura!", "Potężne zaklęcie!", "Odsuń się!", "Twoja tura."] self.input_text = "" self.active = False self.rect = pygame.Rect(20, 600, 700, 180) self.bg_color = (10, 10, 10) self.text_color = (255, 255, 255) self.input_rect = pygame.Rect(25, 750, 600, 25)
+class ChatSystem: def init(self, quick_messages=None): self.messages = [] self.max_messages = 20 self.font = pygame.font.SysFont("timesnewroman", 20) self.input_active = False self.input_text = "" self.quick_messages = quick_messages if quick_messages else [] self.rect = pygame.Rect(20, 520, 800, 250) self.scroll_offset = 0
 
 def draw(self, screen):
-    pygame.draw.rect(screen, self.bg_color, self.rect)
-    y = self.rect.top + 10
-    for msg in self.messages[-self.max_messages:]:
-        text_surface = self.font.render(msg, True, self.text_color)
-        screen.blit(text_surface, (self.rect.left + 10, y))
-        y += 20
+    pygame.draw.rect(screen, (10, 10, 10), self.rect)
+    pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)
 
-    pygame.draw.rect(screen, (30, 30, 30), self.input_rect)
-    input_surface = self.font.render(self.input_text, True, self.text_color)
-    screen.blit(input_surface, (self.input_rect.x + 5, self.input_rect.y + 5))
+    y_offset = self.rect.y + 5
+    visible_messages = self.messages[-(self.max_messages + self.scroll_offset):-self.scroll_offset or None]
+    for msg in visible_messages:
+        msg_surface = self.font.render(msg, True, (200, 200, 200))
+        screen.blit(msg_surface, (self.rect.x + 5, y_offset))
+        y_offset += 20
+
+    if self.input_active:
+        input_surface = self.font.render(self.input_text + "|", True, (0, 255, 0))
+        screen.blit(input_surface, (self.rect.x + 5, y_offset))
+
+def update(self):
+    pass
+
+def handle_click(self, pos):
+    if self.rect.collidepoint(pos):
+        self.input_active = True
+    else:
+        self.input_active = False
 
 def handle_key(self, key):
+    if not self.input_active:
+        return
+
     if key == pygame.K_RETURN:
-        if self.input_text.strip():
-            self.send_message(self.input_text.strip())
-            self.input_text = ""
+        self.send_message(self.input_text)
+        self.input_text = ""
     elif key == pygame.K_BACKSPACE:
         self.input_text = self.input_text[:-1]
+    elif key == pygame.K_UP:
+        self.scroll_offset = min(self.scroll_offset + 1, len(self.messages) - self.max_messages)
+    elif key == pygame.K_DOWN:
+        self.scroll_offset = max(self.scroll_offset - 1, 0)
     else:
-        if len(self.input_text) < 100:
-            self.input_text += pygame.key.name(key)
+        name = pygame.key.name(key)
+        if len(name) == 1:
+            self.input_text += name
 
-def send_message(self, message):
-    self.messages.append(message)
-    if len(self.messages) >
+def send_message(self, text):
+    if text.strip():
+        self.messages.append(f"Ty: {text}")
+
+def send_quick_message(self, text):
+    self.messages.append(f"(Szybko): {text}")
+
+def receive_message(self, text):
+    self.messages.append(f"Gracz: {text}")
 
