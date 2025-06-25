@@ -1,60 +1,40 @@
-spells_data.py – pełny system czarów z GUI dla 7 klas, zamknięty i gotowy do użycia
+spells_data.py – Pełna baza zaklęć dla klas w Firos: Magic & Magic
 
-spell_data = { "Żarowid": [ {"name": "Iskra Zarwena", "description": "Wystrzeliwuje iskrę ognia wprost w przeciwnika.", "mana_cost": 10, "power": 25, "level": 1, "type": "active"}, {"name": "Płomień Kłusaka", "description": "Podpala pole bitwy, raniąc wrogów przez 3 tury.", "mana_cost": 15, "power": 35, "level": 2, "type": "active"}, {"name": "Bariera Żaru", "description": "Magiczna bariera zmniejszająca obrażenia.", "mana_cost": 12, "power": 0, "level": 2, "type": "buff"}, {"name": "Runiczny Ogień", "description": "Runy na ziemi eksplodują przy zbliżeniu się wroga.", "mana_cost": 18, "power": 30, "level": 3, "type": "active"}, {"name": "Krąg Gorąca", "description": "Aura żaru zadaje obrażenia wszystkim pobliskim celom.", "mana_cost": 22, "power": 40, "level": 4, "type": "active"}, {"name": "Oczyszczenie Płomieniem", "description": "Usuwa negatywne efekty z sojuszników.", "mana_cost": 25, "power": 0, "level": 5, "type": "buff"} ],
+Struktura: lista słowników z zaklęciami, podzielona na klasy postaci
 
-"Krwiścier": [
-    {"name": "Rozbłysk Furii", "description": "Podwójne obrażenia przez jedną turę.", "mana_cost": 20, "power": 40, "level": 2, "type": "active"},
-    {"name": "Krzyk Wojenny", "description": "Zwiększa siłę ataku sojuszników o 15%.", "mana_cost": 10, "power": 0, "level": 1, "type": "buff"},
-    {"name": "Cios Rozpłatania", "description": "Przebija pancerz wroga.", "mana_cost": 18, "power": 50, "level": 3, "type": "active"},
-    {"name": "Pancerz Gniewu", "description": "Zwiększa pancerz o 20% przez 2 tury.", "mana_cost": 14, "power": 0, "level": 2, "type": "buff"},
-    {"name": "Uderzenie Krwi", "description": "Zadaje obrażenia i leczy za połowę.", "mana_cost": 20, "power": 30, "level": 4, "type": "active"},
-    {"name": "Wola Przodków", "description": "Przywraca 25% many.", "mana_cost": 0, "power": 0, "level": 5, "type": "buff"}
-],
+Każde zaklęcie zawiera nazwę, poziom, typ, koszt many, moc, opis, klasę oraz wymagany poziom gracza
 
-"Wiedźcior": [
-    {"name": "Szept Wilków", "description": "Zwiększa szansę uniku o 20%.", "mana_cost": 8, "power": 0, "level": 2, "type": "buff"},
-    {"name": "Zmysły Bestii", "description": "Kontruje pierwszy cios.", "mana_cost": 12, "power": 15, "level": 3, "type": "active"},
-    {"name": "Znak Igni", "description": "Miot ognia zadający obrażenia wszystkim wrogom.", "mana_cost": 18, "power": 30, "level": 4, "type": "active"},
-    {"name": "Refleks Mutanta", "description": "Więcej ataków w tej rundzie.", "mana_cost": 10, "power": 0, "level": 3, "type": "buff"},
-    {"name": "Znak Yrden", "description": "Spowalnia wroga.", "mana_cost": 15, "power": 10, "level": 4, "type": "active"},
-    {"name": "Oczyszczenie", "description": "Usuwa wszystkie negatywne efekty.", "mana_cost": 20, "power": 0, "level": 5, "type": "buff"}
-],
+spells = [ # 🔥 Mag Ognia {"name": "Iskra Żarwena", "level": 1, "type": "ogień", "mana": 10, "power": 15, "description": "Pierwszy płomień Żarwena, który rani i podpala.", "class": "Mag", "required_level": 1}, {"name": "Płomień Swaroża", "level": 2, "type": "ogień", "mana": 12, "power": 20, "description": "Czysty ogień Swarożyca – wybuchowy i nieujarzmiony.", "class": "Mag", "required_level": 3}, {"name": "Żagiew Welesowa", "level": 3, "type": "ogień", "mana": 15, "power": 30, "description": "Ognista siła Welesa atakująca wielu przeciwników.", "class": "Mag", "required_level": 5}, {"name": "Cień Swaroga", "level": 10, "type": "ogień", "mana": 30, "power": 70, "description": "Ostateczna forma ognia – spopiela duszę.", "class": "Mag", "required_level": 10},
 
-"Mrokorzyt": [
-    {"name": "Zew Umarłych", "description": "Przyzywa martwego do ataku.", "mana_cost": 18, "power": 35, "level": 3, "type": "active"},
-    {"name": "Kościane Więzy", "description": "Unieruchamia przeciwnika.", "mana_cost": 16, "power": 0, "level": 2, "type": "buff"},
-    {"name": "Blask Krypt", "description": "Zadaje obrażenia obszarowe od cienia.", "mana_cost": 20, "power": 40, "level": 4, "type": "active"},
-    {"name": "Wieczne Lamenty", "description": "Zwiększa moc zaklęć o 25% przez 2 tury.", "mana_cost": 15, "power": 0, "level": 3, "type": "buff"},
-    {"name": "Nekrosfera", "description": "Obszar klątw.", "mana_cost": 25, "power": 35, "level": 5, "type": "active"},
-    {"name": "Szept Grobu", "description": "Zmniejsza obrażenia otrzymywane o 15%.", "mana_cost": 10, "power": 0, "level": 2, "type": "buff"}
-],
+# ❄️ Mag Lodu
+{"name": "Szron Dziadosza", "level": 1, "type": "lód", "mana": 9, "power": 12, "description": "Pierwszy chłód duchów puszczy.", "class": "Mag", "required_level": 1},
+{"name": "Zlodź Opółca", "level": 3, "type": "lód", "mana": 14, "power": 22, "description": "Zatrzymuje wroga w lodzie.", "class": "Mag", "required_level": 4},
 
-"Stryłecznik": [
-    {"name": "Strzała Mgły", "description": "Strzała zwiększająca szansę trafienia krytycznego.", "mana_cost": 10, "power": 20, "level": 1, "type": "active"},
-    {"name": "Ukrycie w Cieniu", "description": "Unik przez 1 rundę.", "mana_cost": 8, "power": 0, "level": 2, "type": "buff"},
-    {"name": "Cios z Zaskoczenia", "description": "Podwójne obrażenia, jeśli wróg nie atakował.", "mana_cost": 15, "power": 35, "level": 3, "type": "active"},
-    {"name": "Zatruta Strzała", "description": "Zadaje obrażenia przez 3 tury.", "mana_cost": 12, "power": 10, "level": 3, "type": "active"},
-    {"name": "Skrytobójstwo", "description": "Natychmiastowa eliminacja słabego wroga.", "mana_cost": 20, "power": 50, "level": 5, "type": "active"},
-    {"name": "Mistyfikacja", "description": "Zamienia miejscami z klonem.", "mana_cost": 18, "power": 0, "level": 4, "type": "buff"}
-],
+# ☠️ Nekromanta
+{"name": "Krzyk Wołchwów", "level": 1, "type": "nekro", "mana": 11, "power": 18, "description": "Dźwięk śmierci, który osłabia żywych.", "class": "Nekromanta", "required_level": 1},
+{"name": "Zgoniec", "level": 5, "type": "nekro", "mana": 20, "power": 35, "description": "Przywołanie upiora, który atakuje wroga.", "class": "Nekromanta", "required_level": 6},
 
-"Zielarzec": [
-    {"name": "Napój Kruka", "description": "Leczy 25% HP.", "mana_cost": 10, "power": -25, "level": 1, "type": "buff"},
-    {"name": "Korzenna Osłona", "description": "Zwiększa odporność na trucizny.", "mana_cost": 8, "power": 0, "level": 2, "type": "buff"},
-    {"name": "Wywar Wilczura", "description": "Zadaje obrażenia bestiom.", "mana_cost": 14, "power": 30, "level": 3, "type": "active"},
-    {"name": "Zgnilizna", "description": "Wrogowie otrzymują obrażenia co turę.", "mana_cost": 16, "power": 25, "level": 4, "type": "active"},
-    {"name": "Eliksir Spokoju", "description": "Zmniejsza agresję wroga.", "mana_cost": 12, "power": 0, "level": 2, "type": "buff"},
-    {"name": "Wyciszenie", "description": "Uniemożliwia rzucanie czarów.", "mana_cost": 15, "power": 0, "level": 3, "type": "active"}
-],
+# 🧪 Alchemik
+{"name": "Wybuch Wiary", "level": 1, "type": "chemia", "mana": 10, "power": 17, "description": "Alchemiczny ogień – wybuch eliksiru.", "class": "Alchemik", "required_level": 1},
+{"name": "Zatruta Mgła", "level": 2, "type": "chemia", "mana": 13, "power": 23, "description": "Otacza wroga trucizną, która go dusi.", "class": "Alchemik", "required_level": 3},
 
-"Snemistrz": [
-    {"name": "Mgła Sennych Cieni", "description": "Wróg nie trafia przez 1 turę.", "mana_cost": 15, "power": 0, "level": 2, "type": "buff"},
-    {"name": "Szepczące Przestrzenie", "description": "Przyspieszenie regeneracji many.", "mana_cost": 12, "power": 0, "level": 2, "type": "buff"},
-    {"name": "Sen Wiecznego Kamienia", "description": "Uśpia przeciwnika.", "mana_cost": 18, "power": 0, "level": 3, "type": "active"},
-    {"name": "Spaczenie Pamięci", "description": "Wrogi gracz zapomina czar.", "mana_cost": 25, "power": 0, "level": 5, "type": "active"},
-    {"name": "Objawienie", "description": "Odsłania ukrytych przeciwników.", "mana_cost": 10, "power": 0, "level": 2, "type": "buff"},
-    {"name": "Sny Cierpienia", "description": "Zadaje obrażenia psychiczne.", "mana_cost": 20, "power": 35, "level": 4, "type": "active"}
+# 🐺 Mutant
+{"name": "Skórka Żelazna", "level": 1, "type": "mutacja", "mana": 8, "power": 15, "description": "Mutacja skóry – zamienia się w żelazną powłokę.", "class": "Mutant", "required_level": 1},
+{"name": "Szał Mięśni", "level": 3, "type": "mutacja", "mana": 14, "power": 28, "description": "Mięśnie pęcznieją, zwiększając atak.", "class": "Mutant", "required_level": 4},
+
+# 🗡️ Wojownik
+{"name": "Ryk Chwata", "level": 1, "type": "fizyczny", "mana": 6, "power": 14, "description": "Wydobywa krzyk, który osłabia przeciwnika.", "class": "Wojownik", "required_level": 1},
+{"name": "Gromostrzał", "level": 2, "type": "fizyczny", "mana": 10, "power": 25, "description": "Przebijający cios z siłą błyskawicy.", "class": "Wojownik", "required_level": 3},
+
+# 🏹 Łucznik
+{"name": "Strzała Mokoszy", "level": 1, "type": "wiatr", "mana": 7, "power": 16, "description": "Natchniona strzała – nie chybia celu.", "class": "Łucznik", "required_level": 1},
+{"name": "Widmowy Bełt", "level": 3, "type": "cień", "mana": 12, "power": 24, "description": "Niewidoczny pocisk – rani i dezorientuje.", "class": "Łucznik", "required_level": 4},
+
+# 🧙 Wiedzący / Szeptun
+{"name": "Modlitwa Kraka", "level": 1, "type": "duchowy", "mana": 9, "power": 12, "description": "Cisza i światło – leczy rany.", "class": "Szeptun", "required_level": 1},
+{"name": "Dotyk Białobożki", "level": 2, "type": "duchowy", "mana": 13, "power": 22, "description": "Uzdrowienie duszy i ciała.", "class": "Szeptun", "required_level": 3}
+
 ]
 
-}
+Można rozszerzyć do pełnych 10 poziomów dynamicznie w grze na podstawie tej bazy.
 
