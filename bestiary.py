@@ -1,37 +1,42 @@
-class Creature:
-    def __init__(self, name, level, health, attack, rarity, loot):
-        self.name = name
-        self.level = level
-        self.health = health
-        self.attack = attack
-        self.rarity = rarity  # 'powszechny', 'rzadki', 'epicki', 'legendarny'
-        self.loot = loot      # np. {"Ząb Wilka": 1, "Złoto": 50}
+bestiary.py – rozszerzona wersja z poziomami, HP i zakresem obrażeń
 
-    def __str__(self):
-        return f"{self.name} (Lvl {self.level}) – HP: {self.health}, ATK: {self.attack}, Rzadkość: {self.rarity}"
+import sqlite3 import random
 
-class Bestiary:
-    def __init__(self):
-        self.creatures = []
+class Creature: def init(self, name, description, strength, weakness, habitat, level, health, damage_range): self.name = name self.description = description self.strength = strength self.weakness = weakness self.habitat = habitat self.level = level self.health = health self.damage_range = damage_range
 
-    def add_creature(self, creature):
-        self.creatures.append(creature)
-        print(f"📚 Dodano do bestiariusza: {creature.name}")
+class Bestiary: def init(self, db_path="firos_game_database.db"): self.conn = sqlite3.connect(db_path) self.create_table()
 
-    def list_creatures(self):
-        print("\n=== Bestiariusz ===")
-        if not self.creatures:
-            print("Brak wpisów.")
-            return
-        for i, c in enumerate(self.creatures, 1):
-            print(f"{i}. {c}")
+def create_table(self):
+    self.conn.execute("""
+    CREATE TABLE IF NOT EXISTS creatures (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        description TEXT,
+        strength TEXT,
+        weakness TEXT,
+        habitat TEXT,
+        level INTEGER,
+        health INTEGER,
+        damage_range TEXT
+    )
+    """)
+    self.conn.commit()
 
-    def find_by_level(self, min_lvl, max_lvl):
-        return [c for c in self.creatures if min_lvl <= c.level <= max_lvl]
+def add_creature(self, creature):
+    self.conn.execute("""
+        INSERT INTO creatures (name, description, strength, weakness, habitat, level, health, damage_range)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (creature.name, creature.description, creature.strength,
+         creature.weakness, creature.habitat, creature.level,
+         creature.health, f"{creature.damage_range[0]}-{creature.damage_range[1]}"))
+    self.conn.commit()
 
-# Przykład testowy:
-if __name__ == "__main__":
-    bestiary = Bestiary()
-    bestiary.add_creature(Creature("Wilk", 2, 30, 5, "powszechny", {"Skóra Wilka": 1, "Złoto": 10}))
-    bestiary.add_creature(Creature("Upiór Cienia", 7, 120, 18, "epicki", {"Ektoplazma": 1, "Mroczny Kamień": 1}))
-    bestiary.list_creatures()
+def get_all_creatures(self):
+    return self.conn.execute("SELECT * FROM creatures").fetchall()
+
+Przykladowe dane potworów
+
+creatures_data = [ ("Złowrogi Wilk", "Wilk nocy z krwistymi oczami", "Szybkość", "Ogień", "Lasy", 2, 150, (10, 25)), ("Upiorna Wiedźma", "Magini rzucająca klątwy i wiry ognia", "Magia", "Stal", "Bagna", 5, 230, (20, 40)), ("Kruk Krwi", "Latający zwiadowca śmierci", "Skrzydła", "Pociski", "Ruiny", 3, 90, (5, 20)), # Dodaj więcej... ]
+
+if name == "main": bestiary = Bestiary() for data in creatures_data: creature = Creature(*data) bestiary.add_creature(creature) print("Zaktualizowano bazę potworów z poziomami, zdrowiem i obrażeniami.")
+
