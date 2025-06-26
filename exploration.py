@@ -1,77 +1,95 @@
-# exploration.py – Eksploracja świata, składniki, potwory i wydarzenia
+# exploration.py – Rozszerzony system eksploracji świata FIROS
 
 import random
-from backpack import Backpack
-from viev_bestiary import show_all_creatures  # lub system encounterów
-from xp_system import PlayerStats
+from map_system import MapSystem, move_to_location
 
-# Lista lokacji do eksploracji
-locations = [
-    {
-        "name": "Mroczny Las",
-        "description": "Ciemny las pełen ziół, ale też niebezpiecznych stworzeń.",
-        "loot": ["ziele", "grzyb", "popiół", "krew"],
-        "enemy_chance": 30,
-        "event": "szept w krzakach"
-    },
-    {
-        "name": "Bagna Cienia",
-        "description": "Zarośnięte bagno pełne pułapek i zmutowanych owadów.",
-        "loot": ["cień", "woda", "jadowity mech"],
-        "enemy_chance": 40,
-        "event": "znalazłeś porzucone ciało"
-    },
-    {
-        "name": "Ruiny Starożytnych",
-        "description": "Ruiny miasta sprzed tysiącleci. Może coś tu zostało?",
-        "loot": ["runiczny_papier", "pergamin", "kamień rytualny"],
-        "enemy_chance": 50,
-        "event": "głuchy dźwięk w oddali"
-    }
-]
+class Explorer:
+    def __init__(self, name):
+        self.name = name
+        self.current_location = None
+        self.exploration_points = 0
+        self.level = 1
+        self.history = []
+        self.active_events = []
 
-# Globalne obiekty
-player_backpack = Backpack()
-player_stats = PlayerStats("Gracz")
+    def set_start(self, location):
+        self.current_location = location
+        location.reveal()
+        self.history.append(location.name)
 
-def explore():
-    print("\n🌍 Wybierz lokację do eksploracji:")
-    for idx, loc in enumerate(locations, 1):
-        print(f"{idx}. {loc['name']} – {loc['description']}")
+    def explore(self, map_system):
+        if not self.current_location:
+            print("🧭 Nie ustawiono miejsca startowego.")
+            return
 
-    choice = input("Wybierz numer lokacji: ").strip()
-    if not choice.isdigit():
-        print("❌ Nieprawidłowy wybór.")
-        return
+        if not self.current_location.connected_paths:
+            print("🔒 Brak połączeń z innymi lokacjami.")
+            return
 
-    idx = int(choice) - 1
-    if not (0 <= idx < len(locations)):
-        print("❌ Nieprawidłowy numer.")
-        return
+        options = self.current_location.connected_paths
+        print("\n🌍 Dostępne ścieżki:")
+        for i, loc in enumerate(options):
+            print(f"{i+1}. {loc.name} ({loc.special_type}, zagrożenie: {loc.danger_level})")
 
-    loc = locations[idx]
-    print(f"\n🧭 Eksplorujesz: {loc['name']}...")
-    print(f"🌫️ {loc['event']}")
+        try:
+            choice = int(input("➡️  Wybierz miejsce do eksploracji: ")) - 1
+            next_location = options[choice]
+        except:
+            print("❌ Błąd wyboru.")
+            return
 
-    # Szansa na walkę z potworem
-    if random.randint(1, 100) <= loc["enemy_chance"]:
-        print("⚔️ Zostałeś zaatakowany przez potwora!")
-        show_all_creatures()  # można tu podpiąć walkę
-        player_stats.gain_exp(75)  # testowy drop EXP
-    else:
-        print("🤫 Cicho i spokojnie...")
+        move_to_location(map_system, self.current_location.name, next_location.name)
+        self.current_location = next_location
+        self.history.append(next_location.name)
+        self.exploration_points += 5
 
-    # Szansa na loot
-    loot_found = random.sample(loc["loot"], k=random.randint(1, min(3, len(loc["loot"]))))
-    for item in loot_found:
-        player_backpack.add_ingredient(item)
+        # Poziomowanie
+        if self.exploration_points >= self.level * 20:
+            self.level += 1
+            self.exploration_points = 0
+            print(f"\n🌟 {self.name} osiąga poziom eksploratora {self.level}!")
 
-    player_stats.show_exp()
+        # Wydarzenia specjalne
+        self.handle_exploration_event()
 
-# Test samodzielny
+    def handle_exploration_event(self):
+        events = [
+            "🗝️ Znaleziono klucz do starożytnej bramy.",
+            "📜 Odkryto fragment zaginionej kroniki.",
+            "🐉 Napotkano rannego smoka — pomóc czy odejść?",
+            "🧙 Tajemniczy mag oferuje teleportację do nieznanej lokacji.",
+            "🪦 Natknięto się na stary cmentarz — coś się porusza w cieniu..."
+        ]
+        chance = random.randint(1, 100)
+        if chance < 40:
+            event = random.choice(events)
+            print(f"\n✨ Wydarzenie specjalne: {event}")
+            self.active_events.append(event)
+
+    def get_journal(self):
+        print(f"\n📖 Dziennik eksploratora: {self.name}")
+        print(f"Poziom: {self.level}, Punkty eksploracji: {self.exploration_points}")
+        print("Odwiedzone lokacje:")
+        for loc in self.history:
+            print(f" - {loc}")
+        if self.active_events:
+            print("\nWydarzenia napotkane:")
+            for e in self.active_events:
+                print(f" - {e}")
+        else:
+            print("Brak wydarzeń.")
+
+# Test systemu eksploracji
+
 if __name__ == "__main__":
+    firos_map = generate_full_firos_map()
+    player = Explorer("Aelendril")
+    player.set_start(firos_map.get_location_by_name("Wiedźmograd"))
+
     while True:
-        explore()
-        again = input("\nEksplorować dalej? (t/n): ").strip().lower()
-        if again != "t":
+        player.explore(firos_map)
+        more = input("\nEksplorować dalej? (t/n): ")
+        if more.lower() != 't':
             break
+
+    player.get_journal()
