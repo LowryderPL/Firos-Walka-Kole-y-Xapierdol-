@@ -1,82 +1,87 @@
-guilds.py – System Gildii (FIROS: Magic & Magic)
+# guilds.py – System gildii FIROS: Magia i Miecz
 
-Autor: System FIROS
+class Guild:
+    def __init__(self, name, founder):
+        self.name = name
+        self.founder = founder
+        self.members = [founder]
+        self.level = 1
+        self.experience = 0
+        self.gold = 0
+        self.honor = 0
+        self.territory = []
+        self.upgrades = []
+        self.guild_points = 0
+        self.chat_log = []
+        self.bosses_defeated = []
+        self.faction = None
+        self.history = []
+        self.active_missions = []
+        self.guild_hall = "Drewniana Sala"
+        self.wars = []
 
-Status: Szkielet – do uzupełnienia i rozszerzenia
+    def add_member(self, player):
+        if player not in self.members:
+            self.members.append(player)
+            self.history.append(f"{player} dołączył do gildii {self.name}.")
 
-import uuid import datetime
+    def remove_member(self, player):
+        if player in self.members:
+            self.members.remove(player)
+            self.history.append(f"{player} opuścił gildię {self.name}.")
 
-class Guild: def init(self, name, leader_id): self.id = str(uuid.uuid4()) self.name = name self.leader_id = leader_id self.members = {leader_id: "Leader"} self.gold = 0 self.points = 0 self.guild_level = 1 self.guild_bank = {} self.quests_completed = [] self.bosses_defeated = [] self.upgrades = [] self.logs = []
+    def send_message(self, player, message):
+        self.chat_log.append(f"[{player}]: {message}")
 
-def add_member(self, user_id, role="Member"):
-    if user_id not in self.members:
-        self.members[user_id] = role
-        self.logs.append(f"[{datetime.datetime.now()}] {user_id} joined guild.")
+    def contribute_gold(self, player, amount):
+        self.gold += amount
+        self.history.append(f"{player} przekazał {amount} sztuk złota do gildii.")
 
-def remove_member(self, user_id):
-    if user_id in self.members:
-        del self.members[user_id]
-        self.logs.append(f"[{datetime.datetime.now()}] {user_id} removed from guild.")
+    def start_mission(self, mission_name):
+        self.active_missions.append(mission_name)
+        self.history.append(f"Gildia rozpoczęła misję: {mission_name}")
 
-def donate_gold(self, user_id, amount):
-    self.gold += amount
-    self.logs.append(f"[{datetime.datetime.now()}] {user_id} donated {amount} gold.")
+    def finish_mission(self, mission_name, success=True):
+        if mission_name in self.active_missions:
+            self.active_missions.remove(mission_name)
+            if success:
+                self.experience += 50
+                self.guild_points += 1
+                self.history.append(f"Misja zakończona sukcesem: {mission_name}")
+            else:
+                self.history.append(f"Misja nie powiodła się: {mission_name}")
 
-def upgrade_guild(self, upgrade_name, cost):
-    if self.gold >= cost:
-        self.gold -= cost
-        self.upgrades.append(upgrade_name)
-        self.guild_level += 1
-        self.logs.append(f"[{datetime.datetime.now()}] Guild upgraded with {upgrade_name}.")
+    def declare_war(self, other_guild):
+        self.wars.append(other_guild)
+        self.history.append(f"Wypowiedziano wojnę gildii {other_guild.name}")
 
-def complete_quest(self, quest_id):
-    self.quests_completed.append(quest_id)
-    self.points += 10
-    self.logs.append(f"[{datetime.datetime.now()}] Guild completed quest {quest_id}.")
+    def defeat_boss(self, boss_name):
+        self.bosses_defeated.append(boss_name)
+        self.experience += 100
+        self.history.append(f"Gildia pokonała bossa: {boss_name}")
 
-def defeat_boss(self, boss_name):
-    self.bosses_defeated.append(boss_name)
-    self.points += 50
-    self.logs.append(f"[{datetime.datetime.now()}] Boss {boss_name} defeated.")
+    def level_up(self):
+        required_exp = self.level * 150
+        if self.experience >= required_exp:
+            self.level += 1
+            self.experience -= required_exp
+            self.history.append(f"Gildia awansowała na poziom {self.level}!")
 
-def status(self):
-    return {
-        "name": self.name,
-        "leader": self.leader_id,
-        "level": self.guild_level,
-        "members": len(self.members),
-        "gold": self.gold,
-        "points": self.points,
-        "upgrades": self.upgrades,
-    }
+    def set_faction(self, faction_name):
+        self.faction = faction_name
+        self.history.append(f"Gildia dołączyła do frakcji: {faction_name}")
 
-GuildsManager – zarządzanie wszystkimi gildiami
-
-class GuildsManager: def init(self): self.guilds = {}
-
-def create_guild(self, name, leader_id):
-    guild = Guild(name, leader_id)
-    self.guilds[guild.id] = guild
-    return guild.id
-
-def get_guild(self, guild_id):
-    return self.guilds.get(guild_id)
-
-def list_guilds(self):
-    return [{"id": gid, **g.status()} for gid, g in self.guilds.items()]
-
-def donate_to_guild(self, guild_id, user_id, amount):
-    guild = self.get_guild(guild_id)
-    if guild:
-        guild.donate_gold(user_id, amount)
-
-def upgrade_guild(self, guild_id, upgrade_name, cost):
-    guild = self.get_guild(guild_id)
-    if guild:
-        guild.upgrade_guild(upgrade_name, cost)
-
-def run_guild_boss_battle(self, guild_id, boss_name):
-    guild = self.get_guild(guild_id)
-    if guild:
-        guild.defeat_boss(boss_name)
-
+    def get_summary(self):
+        return {
+            "Nazwa": self.name,
+            "Założyciel": self.founder,
+            "Poziom": self.level,
+            "Złoto": self.gold,
+            "Honor": self.honor,
+            "Frakcja": self.faction,
+            "Misje aktywne": self.active_missions,
+            "Pokonani bossowie": self.bosses_defeated,
+            "Terytorium": self.territory,
+            "Członkowie": self.members,
+            "Wojny": [g.name for g in self.wars]
+        }
