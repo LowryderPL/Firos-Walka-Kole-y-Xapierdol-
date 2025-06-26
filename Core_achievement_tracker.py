@@ -1,4 +1,4 @@
-# achievement_tracker.py — System osiągnięć FIROS
+# core_achievement_tracker.py — System osiągnięć FIROS
 
 import json
 from datetime import datetime
@@ -47,16 +47,36 @@ class AchievementSystem:
 
     def _load_achievements(self):
         return {
-            1: Achievement(1, "Pierwsza Krew", "Wygraj swoją pierwszą bitwę", reward_xp=100, reward_rfm=5),
-            2: Achievement(2, "Pogromca Potworów", "Pokonaj 10 potworów", reward_xp=200, reward_rfm=10),
-            3: Achievement(3, "Uczeń Magii", "Użyj pierwszego zaklęcia", reward_xp=50),
-            4: Achievement(4, "Zdobywca Ziem", "Odwiedź 5 różnych regionów", reward_xp=150),
-            5: Achievement(5, "Zbieracz Artefaktów", "Zdobądź 3 unikalne artefakty", reward_xp=250, reward_rfm=20),
-            6: Achievement(6, "Mistrz Rzemiosła", "Wykonaj 5 mikstur", reward_xp=120),
-            7: Achievement(7, "Handlarz", "Sprzedaj przedmiot na rynku", reward_rfm=3),
-            8: Achievement(8, "Bractwo Krwi", "Dołącz do Gildii", reward_xp=100),
-            9: Achievement(9, "Elita PvP", "Wygraj 3 walki PvP", reward_xp=300, reward_rfm=15),
-            10: Achievement(10, "Odkrywca", "Odkryj sekretne lochy", reward_xp=180)
+            1:  Achievement(1,  "Pierwsza Krew", "Wygraj swoją pierwszą bitwę", 100, 5),
+            2:  Achievement(2,  "Pogromca Potworów", "Pokonaj 10 potworów", 200, 10),
+            3:  Achievement(3,  "Uczeń Magii", "Użyj pierwszego zaklęcia", 50, 0),
+            4:  Achievement(4,  "Zdobywca Ziem", "Odwiedź 5 różnych regionów", 150, 10),
+            5:  Achievement(5,  "Zbieracz Artefaktów", "Zdobądź 3 unikalne artefakty", 250, 20),
+            6:  Achievement(6,  "Mistrz Rzemiosła", "Wykonaj 5 mikstur", 100, 10),
+            7:  Achievement(7,  "Handlarz", "Sprzedaj przedmiot na rynku", 50, 3),
+            8:  Achievement(8,  "Bractwo Krwi", "Dołącz do Gildii", 100, 10),
+            9:  Achievement(9,  "Elita PvP", "Wygraj 3 walki PvP", 300, 15),
+            10: Achievement(10, "Odkrywca", "Odkryj sekretną lokację", 180, 0),
+            11: Achievement(11, "Uczeń Run", "Pozyskaj runę", 70, 2),
+            12: Achievement(12, "Zabójca Cieni", "Pokonaj przeciwnika frakcji Cieni", 160, 8),
+            13: Achievement(13, "Tropiciel", "Zbadaj 3 ruiny", 120, 4),
+            14: Achievement(14, "Szlachcic", "Zgromadź 1000 RFM", 0, 0),
+            15: Achievement(15, "Mistrz Strategii", "Wygraj szachy magiczne", 300, 25),
+            16: Achievement(16, "Władca Podziemi", "Pokonaj bossa w lochu", 400, 35),
+            17: Achievement(17, "Zakon Wtajemniczonych", "Ukończ rytuał", 80, 10),
+            18: Achievement(18, "Zguba Wilka", "Pokonaj wilka alfa", 90, 6),
+            19: Achievement(19, "Oko Smoka", "Zdobądź łuskę smoka", 300, 50),
+            20: Achievement(20, "Cichy Skrytobójca", "Wykonaj misję bez wykrycia", 200, 12),
+            21: Achievement(21, "Wiedza to Potęga", "Odczytaj 10 ksiąg", 150, 0),
+            22: Achievement(22, "Wódz", "Poprowadź drużynę w dungeonie", 220, 20),
+            23: Achievement(23, "Błyskawiczna Śmierć", "Pokonaj przeciwnika w jednej turze", 250, 15),
+            24: Achievement(24, "Kolekcjoner Kart", "Zdobądź 30 kart NFT", 100, 30),
+            25: Achievement(25, "Weteran", "Spędź 20h w grze", 300, 0),
+            26: Achievement(26, "Strażnik Balansu", "Zatrzymaj konflikt frakcji", 200, 10),
+            27: Achievement(27, "Głos Gildii", "Weź udział w głosowaniu gildyjnym", 100, 8),
+            28: Achievement(28, "Zasłużony", "Zdobądź 10 odznaczeń", 180, 15),
+            29: Achievement(29, "Rytuał Zjednoczenia", "Zakończ misję frakcyjną", 300, 25),
+            30: Achievement(30, "Legenda FIROS", "Zostań w Top 10 rankingu", 1000, 100),
         }
 
     def get_achievement(self, achievement_id):
@@ -66,6 +86,6 @@ class AchievementSystem:
         return list(self.achievements.values())
 
     def describe(self):
-        print("📜 Lista osiągnięć:")
+        print("🎖 Lista osiągnięć:")
         for ach in self.achievements.values():
-            print(f"{ach.id}. {ach.title} — {ach.description} [+{ach.reward_xp}XP, +{ach.reward_rfm} RFM]")
+            print(f"{ach.id}. {ach.title} - {ach.description} [+{ach.reward_xp}XP, +{ach.reward_rfm} RFM]")
