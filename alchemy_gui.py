@@ -1,64 +1,60 @@
-import tkinter as tk
-from tkinter import messagebox
-from alchemy import AlchemySystem
+import pygame import sys from alchemy import AlchemySystem, Backpack
 
-class AlchemyGUI:
-    def __init__(self, root, inventory, player_stats):
-        self.root = root
-        self.alchemy = AlchemySystem(inventory, player_stats)
-        self.root.title("🧪 Alchemia - Firos")
-        self.root.geometry("520x420")
-        self.root.configure(bg="#111")
+Inicjalizacja
 
-        self.selected_recipe = tk.StringVar()
-        self.message = tk.StringVar()
+pygame.init() screen = pygame.display.set_mode((900, 600)) pygame.display.set_caption("FIROS Alchemia") font = pygame.font.SysFont("timesnewroman", 22) clock = pygame.time.Clock()
 
-        self._build_interface()
+Systemy
 
-    def _build_interface(self):
-        tk.Label(self.root, text="Wybierz eliksir do uwarzenia:", fg="white", bg="#111", font=("Helvetica", 12)).pack(pady=10)
+alchemy = AlchemySystem() backpack = Backpack()
 
-        recipes = list(self.alchemy.recipes.keys())
-        if recipes:
-            self.selected_recipe.set(recipes[0])
-        self.dropdown = tk.OptionMenu(self.root, self.selected_recipe, *recipes)
-        self.dropdown.config(bg="#333", fg="white", font=("Helvetica", 10))
-        self.dropdown["menu"].config(bg="#222", fg="white")
-        self.dropdown.pack(pady=5)
+Kolory
 
-        self.info_label = tk.Label(self.root, text="", fg="#ccc", bg="#111", font=("Helvetica", 10))
-        self.info_label.pack(pady=5)
+WHITE = (255, 255, 255) BLACK = (0, 0, 0) GRAY = (100, 100, 100) GREEN = (0, 200, 0)
 
-        tk.Button(self.root, text="Uwarz eliksir", command=self.brew_potion, bg="#6a3", fg="white", font=("Helvetica", 11, "bold")).pack(pady=10)
-        tk.Label(self.root, textvariable=self.message, fg="#4caf50", bg="#111", wraplength=460, font=("Helvetica", 10)).pack(pady=10)
+input_box = pygame.Rect(50, 500, 800, 32) user_text = '' feedback_text = ''
 
-        tk.Button(self.root, text="Zamknij", command=self.root.quit, bg="#a22", fg="white").pack(pady=5)
+def draw_interface(): screen.fill((30, 30, 30))
 
-        self.selected_recipe.trace("w", self.update_info)
-        self.update_info()
+title = font.render("System Alchemii FIROS", True, WHITE)
+screen.blit(title, (50, 20))
 
-    def update_info(self, *args):
-        name = self.selected_recipe.get()
-        if name:
-            recipe = self.alchemy.recipes[name]
-            ingredients = ", ".join(f"{item} x{qty}" for item, qty in recipe["ingredients"].items())
-            effect = recipe["effect"]
-            self.info_label.config(text=f"Składniki: {ingredients}\nEfekt: {effect}")
+desc = font.render("Wpisz składniki (oddzielone przecinkami) i naciśnij Enter", True, GRAY)
+screen.blit(desc, (50, 60))
 
-    def brew_potion(self):
-        name = self.selected_recipe.get()
-        result = self.alchemy.brew(name)
-        self.message.set(result)
-        self.update_info()
+txt_surface = font.render(user_text, True, WHITE)
+screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
+pygame.draw.rect(screen, WHITE, input_box, 2)
 
-# Test lokalny (odkomentuj, jeśli chcesz uruchomić)
-# if __name__ == "__main__":
-#     inventory = {
-#         "Zioła": 5,
-#         "Krew Trolla": 2,
-#         "Esencja Ognia": 1
-#     }
-#     stats = {"alchemy_lvl": 3}
-#     root = tk.Tk()
-#     app = AlchemyGUI(root, inventory, stats)
-#     root.mainloop()
+feedback_surface = font.render(feedback_text, True, GREEN)
+screen.blit(feedback_surface, (50, 550))
+
+pygame.display.flip()
+
+def main(): global user_text, feedback_text
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                ingredients = [s.strip() for s in user_text.split(',')]
+                result = alchemy.craft(ingredients)
+                feedback_text = result
+                user_text = ''
+            elif event.key == pygame.K_BACKSPACE:
+                user_text = user_text[:-1]
+            else:
+                user_text += event.unicode
+
+    draw_interface()
+    clock.tick(30)
+
+pygame.quit()
+sys.exit()
+
+if name == "main": main()
+
