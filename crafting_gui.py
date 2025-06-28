@@ -1,40 +1,63 @@
 
-# crafting_gui.py
-import tkinter as tk
-from crafting import CraftingSystem
-from inventory import Inventory
+# crafting_gui.py - Pełna wersja GUI Craftingu dla Firos: Magic & Magic
+# Zawiera system tworzenia, interfejsu i spalania przedmiotów za EXP
 
 class CraftingGUI:
-    def __init__(self, root, inventory):
-        self.root = root
-        self.system = CraftingSystem(inventory)
-        self.frame = tk.Frame(root)
-        self.frame.pack()
-        self.label = tk.Label(self.frame, text="Crafting System")
-        self.label.pack()
-        self.items_list = tk.Listbox(self.frame)
-        self.items_list.pack()
-        self.craft_button = tk.Button(self.frame, text="Craft", command=self.craft_selected)
-        self.craft_button.pack()
-        self.refresh()
+    def __init__(self, player, inventory, recipes, experience_system):
+        self.player = player
+        self.inventory = inventory
+        self.recipes = recipes
+        self.experience_system = experience_system
 
-    def refresh(self):
-        self.items_list.delete(0, tk.END)
-        for item in self.system.get_craftable_items():
-            self.items_list.insert(tk.END, item)
+    def display(self):
+        print("\n🔨 MENU CRAFTINGU 🔨")
+        print("1. Twórz przedmiot")
+        print("2. Spal przedmiot za EXP")
+        print("3. Wyjście")
 
-    def craft_selected(self):
-        selection = self.items_list.curselection()
-        if not selection:
+        choice = input("Wybierz opcję (1-3): ")
+        if choice == "1":
+            self.craft_item()
+        elif choice == "2":
+            self.burn_item_for_exp()
+        elif choice == "3":
+            print("Zamknięto crafting.")
+        else:
+            print("❌ Nieprawidłowy wybór.")
+            self.display()
+
+    def craft_item(self):
+        print("\n📜 DOSTĘPNE PRZEPISY:")
+        for i, recipe in enumerate(self.recipes, start=1):
+            print(f"{i}. {recipe['name']} - Wymagane: {', '.join(recipe['materials'])}")
+
+        try:
+            index = int(input("Wybierz numer przepisu do wykonania: ")) - 1
+            recipe = self.recipes[index]
+        except (ValueError, IndexError):
+            print("❌ Błąd wyboru przepisu.")
             return
-        item_name = self.items_list.get(selection[0])
-        if self.system.craft(item_name):
-            self.refresh()
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    inv = Inventory()
-    inv.add_item("Iron Ore", 3)
-    inv.add_item("Wood", 1)
-    gui = CraftingGUI(root, inv)
-    root.mainloop()
+        if all(mat in [item.name for item in self.inventory.items] for mat in recipe["materials"]):
+            for mat in recipe["materials"]:
+                self.inventory.remove_item(mat)
+            self.inventory.add_item(recipe["result"])
+            print(f"✅ Stworzono: {recipe['result'].name}")
+        else:
+            print("❌ Brakuje wymaganych materiałów.")
+
+    def burn_item_for_exp(self):
+        print("\n🔥 SPAL PRZEDMIOT ZA EXP:")
+        for i, item in enumerate(self.inventory.items, start=1):
+            print(f"{i}. {item.name} (Moc: {item.power})")
+
+        try:
+            index = int(input("Wybierz numer przedmiotu do spalenia: ")) - 1
+            item = self.inventory.items.pop(index)
+        except (ValueError, IndexError):
+            print("❌ Błąd wyboru przedmiotu.")
+            return
+
+        gained_exp = item.power * 2  # np. 2x moc jako EXP
+        self.experience_system.add_exp(self.player, gained_exp)
+        print(f"🔥 Spalono {item.name}. Zdobyto {gained_exp} EXP.")
