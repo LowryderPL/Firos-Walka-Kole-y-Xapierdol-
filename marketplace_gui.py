@@ -1,55 +1,89 @@
-# marketplace_gui.py — Interfejs GUI dla Marketu Firos
-import pygame
 
-from marketplace import Marketplace, Item, Player
+import tkinter as tk
+from tkinter import messagebox, ttk
 
-pygame.init()
-screen = pygame.display.set_mode((1000, 700))
-pygame.display.set_caption("Firos: Rynek Handlowy")
-font = pygame.font.SysFont("georgia", 24)
+class MarketplaceGUI(tk.Tk):
+    def __init__(self, user_inventory, listings):
+        super().__init__()
+        self.title("Marketplace - Firos Magic & Magic")
+        self.geometry("800x600")
+        self.configure(bg="#1e1e1e")
+        self.user_inventory = user_inventory
+        self.listings = listings
+        self.create_widgets()
 
-marketplace = Marketplace()
-marketplace.add_item(Item("Miecz Runiczny", "Starożytny miecz o mocy ognia", "epicki", 200, 0.5))
-marketplace.add_item(Item("Karta Bohatera: Żarogniew", "Unikalna karta NFT", "legendarna", 0, 1.2))
-marketplace.add_item(Item("Hełm Mgły", "Hełm zapewniający ochronę przed magią", "rzadki", 120, 0.3))
+    def create_widgets(self):
+        title = tk.Label(self, text="🛒 Marketplace", font=("Georgia", 24), bg="#1e1e1e", fg="white")
+        title.pack(pady=10)
 
-player = Player("Wiedźmograd", 600, 3.0)
+        self.tabControl = ttk.Notebook(self)
+        self.tabControl.pack(expand=1, fill="both")
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+        self.create_market_tab()
+        self.create_sell_tab()
 
-def draw_marketplace():
-    screen.fill(BLACK)
-    title = font.render("Rynek Firos — Kliknij przedmiot, aby kupić", True, WHITE)
-    screen.blit(title, (50, 30))
+    def create_market_tab(self):
+        market_tab = ttk.Frame(self.tabControl)
+        self.tabControl.add(market_tab, text='Browse Items')
 
-    y = 100
-    for idx, item in enumerate(marketplace.items):
-        text = font.render(
-            f"{idx + 1}. {item.name} ({item.rarity}) — {item.price_rfn} RFN / {item.price_ton} TON", True, WHITE
-        )
-        screen.blit(text, (60, y))
-        y += 40
+        columns = ('ID', 'Item', 'Type', 'Price', 'Currency', 'Seller')
+        self.market_tree = ttk.Treeview(market_tab, columns=columns, show='headings')
+        for col in columns:
+            self.market_tree.heading(col, text=col)
+            self.market_tree.column(col, width=100)
+        self.market_tree.pack(expand=True, fill='both', padx=10, pady=10)
 
-    pygame.display.flip()
+        for item in self.listings:
+            self.market_tree.insert('', tk.END, values=item)
 
-def main_loop():
-    running = True
-    while running:
-        draw_marketplace()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+        buy_button = tk.Button(market_tab, text="Buy Selected", command=self.buy_item, bg="#3e3e3e", fg="white")
+        buy_button.pack(pady=5)
 
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_y = pygame.mouse.get_pos()[1]
-                selected_index = (mouse_y - 100) // 40
-                if 0 <= selected_index < len(marketplace.items):
-                    item = marketplace.items[selected_index]
-                    result = marketplace.buy_item(item.name, player, "RFN")
-                    print(result)
+    def create_sell_tab(self):
+        sell_tab = ttk.Frame(self.tabControl)
+        self.tabControl.add(sell_tab, text='Sell Item')
 
-    pygame.quit()
+        self.inventory_list = tk.Listbox(sell_tab)
+        for item in self.user_inventory:
+            self.inventory_list.insert(tk.END, item)
+        self.inventory_list.pack(pady=10)
 
+        self.price_entry = tk.Entry(sell_tab)
+        self.price_entry.insert(0, "Enter Price")
+        self.price_entry.pack(pady=5)
+
+        self.currency_var = tk.StringVar()
+        self.currency_var.set("RFN")
+        currency_menu = tk.OptionMenu(sell_tab, self.currency_var, "RFN", "TON")
+        currency_menu.pack(pady=5)
+
+        sell_button = tk.Button(sell_tab, text="List for Sale", command=self.list_item, bg="#3e3e3e", fg="white")
+        sell_button.pack(pady=5)
+
+    def buy_item(self):
+        selected = self.market_tree.selection()
+        if selected:
+            item = self.market_tree.item(selected[0], 'values')
+            messagebox.showinfo("Purchase", f"You bought: {item[1]} for {item[3]} {item[4]}")
+        else:
+            messagebox.showwarning("Warning", "No item selected.")
+
+    def list_item(self):
+        selected_index = self.inventory_list.curselection()
+        if selected_index:
+            item = self.inventory_list.get(selected_index)
+            price = self.price_entry.get()
+            currency = self.currency_var.get()
+            messagebox.showinfo("Listed", f"Listed {item} for {price} {currency}.")
+        else:
+            messagebox.showwarning("Warning", "Select an item to sell.")
+
+# Example usage
 if __name__ == "__main__":
-    main_loop()
+    user_inventory = ["Sword of Fire", "Elven Bow", "Shadow Cloak"]
+    listings = [
+        (1, "Arcane Staff", "Weapon", 300, "RFN", "Player123"),
+        (2, "Dragon Armor", "Armor", 450, "TON", "DarkLord"),
+    ]
+    app = MarketplaceGUI(user_inventory, listings)
+    app.mainloop()
