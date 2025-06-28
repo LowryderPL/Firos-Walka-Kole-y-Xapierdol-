@@ -1,64 +1,71 @@
-# marketplace.py — Firos: Magic & Magic
-# Pełny system handlu: przedmioty, karty NFT, waluty RFN/TON
+# marketplace.py — logika handlu w grze Firos
 
 class Item:
     def __init__(self, name, description, rarity, price_rfn, price_ton):
         self.name = name
         self.description = description
         self.rarity = rarity
-        self.price_rfn = price_rfn
-        self.price_ton = price_ton
+        self.price_rfn = price_rfn  # cena w RFN (waluta gry)
+        self.price_ton = price_ton  # cena w TON (kryptowaluta)
+
+    def __repr__(self):
+        return f"<Item: {self.name} ({self.rarity}) - {self.price_rfn} RFN / {self.price_ton} TON>"
+
+
+class Player:
+    def __init__(self, name, balance_rfn, balance_ton):
+        self.name = name
+        self.balance_rfn = balance_rfn
+        self.balance_ton = balance_ton
+        self.inventory = []
+
+    def add_item(self, item):
+        self.inventory.append(item)
+
+    def __repr__(self):
+        return f"<Player: {self.name} - {self.balance_rfn} RFN / {self.balance_ton} TON>"
+
 
 class Marketplace:
     def __init__(self):
-        self.items = []  # lista przedmiotów dostępnych
-        self.transactions = []  # historia transakcji
+        self.items = []
 
-    def add_item(self, item):
+    def add_item(self, item: Item):
         self.items.append(item)
 
-    def remove_item(self, item_name):
-        self.items = [i for i in self.items if i.name != item_name]
-
-    def list_items(self):
-        return [{
-            "name": item.name,
-            "rarity": item.rarity,
-            "RFN": item.price_rfn,
-            "TON": item.price_ton
-        } for item in self.items]
-
-    def buy_item(self, item_name, buyer, currency):
+    def buy_item(self, item_name, player: Player, currency="RFN"):
         for item in self.items:
             if item.name == item_name:
-                if currency == "RFN" and buyer.rfn >= item.price_rfn:
-                    buyer.rfn -= item.price_rfn
-                    self.transactions.append((buyer.name, item_name, "RFN"))
-                    return f"{buyer.name} kupił {item.name} za {item.price_rfn} RFN"
-                elif currency == "TON" and buyer.ton >= item.price_ton:
-                    buyer.ton -= item.price_ton
-                    self.transactions.append((buyer.name, item_name, "TON"))
-                    return f"{buyer.name} kupił {item.name} za {item.price_ton} TON"
+                if currency == "RFN" and player.balance_rfn >= item.price_rfn:
+                    player.balance_rfn -= item.price_rfn
+                    player.add_item(item)
+                    self.items.remove(item)
+                    return f"{player.name} kupił {item.name} za {item.price_rfn} RFN."
+
+                elif currency == "TON" and player.balance_ton >= item.price_ton:
+                    player.balance_ton -= item.price_ton
+                    player.add_item(item)
+                    self.items.remove(item)
+                    return f"{player.name} kupił {item.name} za {item.price_ton} TON."
+
                 else:
-                    return "Nie masz wystarczających środków!"
-        return "Przedmiot nie istnieje!"
+                    return "Za mało środków!"
 
-# Przykładowy użytkownik
-class Player:
-    def __init__(self, name, rfn, ton):
-        self.name = name
-        self.rfn = rfn
-        self.ton = ton
+        return "Przedmiot nie znaleziony."
 
-# Przykład działania
-if __name__ == "__main__":
-    marketplace = Marketplace()
-    sword = Item("Miecz Runiczny", "Starożytny miecz o mocy ognia", "epicki", 200, 0.5)
-    nft_card = Item("Karta Bohatera: Żarogniew", "Unikalna karta NFT", "legendarna", 0, 1.2)
+    def sell_item(self, item_name, player: Player, currency="RFN"):
+        for item in player.inventory:
+            if item.name == item_name:
+                if currency == "RFN":
+                    player.balance_rfn += item.price_rfn
+                else:
+                    player.balance_ton += item.price_ton
 
-    marketplace.add_item(sword)
-    marketplace.add_item(nft_card)
+                self.items.append(item)
+                player.inventory.remove(item)
+                return f"{player.name} sprzedał {item.name}."
 
-    gracz = Player("Wiedźmograd", 500, 2.0)
-    print(marketplace.buy_item("Miecz Runiczny", gracz, "RFN"))
-    print(marketplace.buy_item("Karta Bohatera: Żarogniew", gracz, "TON"))
+        return "Przedmiot nie znaleziony w ekwipunku."
+
+    def list_items(self):
+        return [str(item) for item in self.items]
