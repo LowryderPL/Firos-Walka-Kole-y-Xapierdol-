@@ -1,60 +1,89 @@
-import pygame import sys from alchemy import AlchemySystem, Backpack
+import pygame
+import sys
 
-Inicjalizacja
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("FIROS: Alchemia")
+font = pygame.font.SysFont("georgia", 22)
+clock = pygame.time.Clock()
 
-pygame.init() screen = pygame.display.set_mode((900, 600)) pygame.display.set_caption("FIROS Alchemia") font = pygame.font.SysFont("timesnewroman", 22) clock = pygame.time.Clock()
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GRAY = (80, 80, 80)
+GOLD = (218, 165, 32)
 
-Systemy
+# Przykładowe składniki i receptury
+ingredients = {
+    "Cierniokorzeń": "Zwiększa siłę",
+    "Żywica Szeptów": "Niewidzialność",
+    "Krew Dymna": "Otrucie",
+    "Łza Feniksa": "Uleczenie",
+    "Mroczna Roślina": "Mutacja"
+}
 
-alchemy = AlchemySystem() backpack = Backpack()
+recipes = {
+    ("Cierniokorzeń", "Krew Dymna"): "Eliksir Furii",
+    ("Żywica Szeptów", "Łza Feniksa"): "Mikstura Cienia",
+    ("Mroczna Roślina", "Krew Dymna"): "Wywar Zmiany Duszy"
+}
 
-Kolory
+selected = []
+messages = []
 
-WHITE = (255, 255, 255) BLACK = (0, 0, 0) GRAY = (100, 100, 100) GREEN = (0, 200, 0)
+def draw_ui():
+    screen.fill((30, 30, 30))
+    y = 50
+    for name in ingredients:
+        color = GOLD if name in selected else WHITE
+        txt = font.render(name, True, color)
+        screen.blit(txt, (50, y))
+        y += 40
 
-input_box = pygame.Rect(50, 500, 800, 32) user_text = '' feedback_text = ''
+    screen.blit(font.render("Kliknij dwa składniki by stworzyć miksturę", True, GRAY), (50, 10))
 
-def draw_interface(): screen.fill((30, 30, 30))
+    msg_y = 300
+    for msg in messages[-4:]:
+        screen.blit(font.render(msg, True, GOLD), (50, msg_y))
+        msg_y += 30
 
-title = font.render("System Alchemii FIROS", True, WHITE)
-screen.blit(title, (50, 20))
+def create_potion():
+    global selected
+    pair = tuple(sorted(selected))
+    potion = recipes.get(pair)
+    if potion:
+        messages.append(f"🎉 Stworzono: {potion}")
+    else:
+        messages.append("❌ Błędna kombinacja.")
+    selected = []
 
-desc = font.render("Wpisz składniki (oddzielone przecinkami) i naciśnij Enter", True, GRAY)
-screen.blit(desc, (50, 60))
+def handle_click(pos):
+    global selected
+    x, y = pos
+    index = (y - 50) // 40
+    if 0 <= index < len(ingredients):
+        name = list(ingredients.keys())[index]
+        if name in selected:
+            selected.remove(name)
+        else:
+            selected.append(name)
+        if len(selected) == 2:
+            create_potion()
 
-txt_surface = font.render(user_text, True, WHITE)
-screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
-pygame.draw.rect(screen, WHITE, input_box, 2)
+def main():
+    running = True
+    while running:
+        draw_ui()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                handle_click(event.pos)
 
-feedback_surface = font.render(feedback_text, True, GREEN)
-screen.blit(feedback_surface, (50, 550))
+        pygame.display.flip()
+        clock.tick(30)
 
-pygame.display.flip()
+    pygame.quit()
+    sys.exit()
 
-def main(): global user_text, feedback_text
-
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RETURN:
-                ingredients = [s.strip() for s in user_text.split(',')]
-                result = alchemy.craft(ingredients)
-                feedback_text = result
-                user_text = ''
-            elif event.key == pygame.K_BACKSPACE:
-                user_text = user_text[:-1]
-            else:
-                user_text += event.unicode
-
-    draw_interface()
-    clock.tick(30)
-
-pygame.quit()
-sys.exit()
-
-if name == "main": main()
-
+if __name__ == "__main__":
+    main()
