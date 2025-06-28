@@ -1,84 +1,74 @@
+# inventory_gui.py – Pełna wersja GUI Ekwipunku z zaawansowanymi slotami
 
-# Finalna wersja inventory.py łącząca pełną funkcjonalność i rozszerzenia
+class InventoryGUI:
+    def __init__(self, inventory):
+        self.inventory = inventory
 
-class Item:
-    def __init__(self, name, type, power=0, weight=0, value=0, description=""):
-        self.name = name
-        self.type = type  # np. "broń", "zbroja", "mikstura"
-        self.power = power
-        self.weight = weight
-        self.value = value
-        self.description = description
+    def display(self):
+        print("\n📦 EKWIPUNEK POSTACI:")
+        for i, item in enumerate(self.inventory.items, start=1):
+            print(f"{i}. {item.name} (typ: {item.type}, moc: {item.power}, waga: {item.weight})")
 
-    def __str__(self):
-        return f"{self.name} ({self.type}) - Moc: {self.power}, Waga: {self.weight}, Wartość: {self.value}"
+        print("\n🎽 WYPSAŻENIE:")
+        for slot, equipment in self.inventory.slots.items():
+            equipped_item = equipment.item.name if equipment.item else "-"
+            print(f"{slot.capitalize()}: {equipped_item}")
 
-class Inventory:
-    def __init__(self, max_weight=150):
-        self.slots = {
-            "głowa": None,
-            "tors": None,
-            "nogi": None,
-            "buty": None,
-            "broń": None,
-            "tarcza": None,
-            "pierścień1": None,
-            "pierścień2": None,
-            "plecak": None,
-            "pas": None,
-            "zwój": None,
-            "artefakt": None,
-            "zwierzę": None,
-            "skrzydła": None,
-            "runiczny_slot": None,
-            "crafting_slot": None
-        }
-        self.items = []
-        self.max_weight = max_weight
+        print(f"\n🎒 Waga całkowita: {self.inventory.get_total_weight()} / {self.inventory.weight_limit} kg")
+        print(f"🔒 Sloty klasowe: {', '.join(self.inventory.allowed_classes)}")
 
-    def current_weight(self):
-        return sum(item.weight for item in self.items)
+        print("\n📚 INTERFEJSY DODATKOWE:")
+        print(" - [S]krzynie")
+        print(" - [C]rafting")
+        print(" - [R]uny")
+        print(" - [B]onusy klasowe")
+        print(" - [P]odsumowanie")
 
-    def add_item(self, item):
-        if self.current_weight() + item.weight <= self.max_weight:
-            self.items.append(item)
-            print(f"Dodano przedmiot: {item}")
+    def show_item_details(self, item_name):
+        item = next((i for i in self.inventory.items if i.name == item_name), None)
+        if item:
+            print(f"\n🔍 SZCZEGÓŁY PRZEDMIOTU: {item.name}")
+            print(f"Typ: {item.type}")
+            print(f"Moc: {item.power}")
+            print(f"Waga: {item.weight}")
+            print(f"Opis: {item.description if hasattr(item, 'description') else 'brak'}")
+            print(f"Limit klasowy: {item.class_limit if hasattr(item, 'class_limit') else 'dowolna'}")
         else:
-            print("Nie możesz dodać tego przedmiotu. Zbyt duża waga!")
+            print(f"❌ Nie znaleziono przedmiotu o nazwie: {item_name}")
 
-    def remove_item(self, item_name):
-        self.items = [item for item in self.items if item.name != item_name]
-
-    def equip_item(self, item):
-        if item.type in self.slots:
-            if self.slots[item.type] is None:
-                self.slots[item.type] = item
-                print(f"Wyposażono: {item.name} w slot {item.type}")
+    def interact(self):
+        while True:
+            self.display()
+            cmd = input("\n🧭 Wpisz nazwę przedmiotu, aby zobaczyć szczegóły, lub komendę (S/C/R/B/P/Q): ").lower()
+            if cmd in ['q', 'quit', 'exit']:
+                break
+            elif cmd == 's':
+                self.open_chest_gui()
+            elif cmd == 'c':
+                self.open_crafting_gui()
+            elif cmd == 'r':
+                self.show_rune_interface()
+            elif cmd == 'b':
+                self.show_class_bonuses()
+            elif cmd == 'p':
+                self.summary()
             else:
-                print(f"Slot {item.type} jest już zajęty przez {self.slots[item.type].name}")
-        else:
-            print(f"Nieznany typ przedmiotu: {item.type}")
+                self.show_item_details(cmd)
 
-    def unequip_item(self, slot_name):
-        if slot_name in self.slots and self.slots[slot_name] is not None:
-            item = self.slots[slot_name]
-            self.slots[slot_name] = None
-            self.add_item(item)
-            print(f"Zdjęto przedmiot: {item.name} ze slotu {slot_name}")
-        else:
-            print("Slot pusty lub nie istnieje.")
+    def open_chest_gui(self):
+        print("\n📦 Skrzynie – przegląd przedmiotów skrzyń (funkcja w budowie)")
 
-    def show_equipment(self):
-        print("Wyposażenie:")
-        for slot, item in self.slots.items():
-            print(f"{slot.title()}: {item.name if item else 'pusty'}")
+    def open_crafting_gui(self):
+        print("\n🔧 Crafting – tworzenie przedmiotów (funkcja w budowie)")
 
-    def show_inventory(self):
-        print("Ekwipunek:")
-        for item in self.items:
-            print(item)
+    def show_rune_interface(self):
+        print("\n💠 Runy – przegląd run i ich aktywacji (funkcja w budowie)")
 
-    def filter_items(self, type_filter=None):
-        if type_filter:
-            return [item for item in self.items if item.type == type_filter]
-        return self.items
+    def show_class_bonuses(self):
+        print("\n🧝‍♀️ Bonusy klasowe – obecna klasa: ", self.inventory.player_class)
+
+    def summary(self):
+        print("\n📋 PODSUMOWANIE EKWIPUNKU:")
+        print(f"Liczba przedmiotów: {len(self.inventory.items)}")
+        print(f"Sloty: {len(self.inventory.slots)}")
+        print(f"Waga: {self.inventory.get_total_weight()} / {self.inventory.weight_limit}")
