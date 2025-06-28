@@ -1,139 +1,84 @@
-# inventory.py — Rozbudowany system ekwipunku w Firos: Magic & Magic
+
+# Finalna wersja inventory.py łącząca pełną funkcjonalność i rozszerzenia
 
 class Item:
-    def __init__(self, name, item_type, power=0, weight=1, value=0, rarity="zwykły", description="", level=1, usable=False):
+    def __init__(self, name, type, power=0, weight=0, value=0, description=""):
         self.name = name
-        self.type = item_type  # np. "zbroja", "mikstura", "artefakt", "runiczny"
+        self.type = type  # np. "broń", "zbroja", "mikstura"
         self.power = power
         self.weight = weight
         self.value = value
-        self.rarity = rarity
         self.description = description
-        self.level = level
-        self.usable = usable
 
     def __str__(self):
-        return (f"{self.name} ({self.type}, {self.rarity}) - Moc: {self.power}, Lvl: {self.level}, "
-                f"Waga: {self.weight}, Wartość: {self.value}\nOpis: {self.description}")
-
-
-class EquipmentSlot:
-    def __init__(self, name):
-        self.name = name
-        self.item = None
-
-    def equip(self, item):
-        self.item = item
-        print(f"🛡️ Wyposażono: {item.name} w slocie {self.name}")
-
-    def unequip(self):
-        if self.item:
-            print(f"❌ Zdjęto: {self.item.name} ze slotu {self.name}")
-            item = self.item
-            self.item = None
-            return item
-        else:
-            print(f"⚠️ Slot {self.name} jest już pusty.")
-            return None
-
-    def __str__(self):
-        return f"{self.name}: {self.item.name if self.item else 'pusty'}"
-
+        return f"{self.name} ({self.type}) - Moc: {self.power}, Waga: {self.weight}, Wartość: {self.value}"
 
 class Inventory:
-    def __init__(self, capacity=40):
+    def __init__(self, max_weight=150):
         self.slots = {
-            "głowa": EquipmentSlot("głowa"),
-            "tors": EquipmentSlot("tors"),
-            "nogi": EquipmentSlot("nogi"),
-            "buty": EquipmentSlot("buty"),
-            "broń": EquipmentSlot("broń"),
-            "tarcza": EquipmentSlot("tarcza"),
-            "amulet": EquipmentSlot("amulet"),
-            "pierścień1": EquipmentSlot("pierścień1"),
-            "pierścień2": EquipmentSlot("pierścień2")
+            "głowa": None,
+            "tors": None,
+            "nogi": None,
+            "buty": None,
+            "broń": None,
+            "tarcza": None,
+            "pierścień1": None,
+            "pierścień2": None,
+            "plecak": None,
+            "pas": None,
+            "zwój": None,
+            "artefakt": None,
+            "zwierzę": None,
+            "skrzydła": None,
+            "runiczny_slot": None,
+            "crafting_slot": None
         }
         self.items = []
-        self.capacity = capacity
+        self.max_weight = max_weight
+
+    def current_weight(self):
+        return sum(item.weight for item in self.items)
 
     def add_item(self, item):
-        if len(self.items) < self.capacity:
+        if self.current_weight() + item.weight <= self.max_weight:
             self.items.append(item)
-            print(f"➕ Dodano do plecaka: {item.name}")
+            print(f"Dodano przedmiot: {item}")
         else:
-            print("❌ Plecak jest pełny!")
+            print("Nie możesz dodać tego przedmiotu. Zbyt duża waga!")
 
     def remove_item(self, item_name):
-        for i, item in enumerate(self.items):
-            if item.name == item_name:
-                del self.items[i]
-                print(f"❌ Usunięto: {item_name} z plecaka")
-                return
-        print(f"⚠️ Nie znaleziono przedmiotu: {item_name}")
+        self.items = [item for item in self.items if item.name != item_name]
 
-    def equip_item(self, slot_name, item_name):
-        item = next((i for i in self.items if i.name == item_name), None)
-        if item and slot_name in self.slots:
-            self.slots[slot_name].equip(item)
-            self.items.remove(item)
+    def equip_item(self, item):
+        if item.type in self.slots:
+            if self.slots[item.type] is None:
+                self.slots[item.type] = item
+                print(f"Wyposażono: {item.name} w slot {item.type}")
+            else:
+                print(f"Slot {item.type} jest już zajęty przez {self.slots[item.type].name}")
         else:
-            print(f"❌ Nie można wyposażyć: {item_name} w slot {slot_name}")
+            print(f"Nieznany typ przedmiotu: {item.type}")
 
     def unequip_item(self, slot_name):
-        if slot_name in self.slots:
-            item = self.slots[slot_name].unequip()
-            if item:
-                self.add_item(item)
-
-    def use_item(self, item_name):
-        item = next((i for i in self.items if i.name == item_name), None)
-        if item:
-            if item.usable:
-                print(f"🧪 Użyto: {item.name} (+{item.power} HP/MANA)")
-                self.items.remove(item)
-            else:
-                print(f"⚠️ {item.name} nie może być użyty!")
+        if slot_name in self.slots and self.slots[slot_name] is not None:
+            item = self.slots[slot_name]
+            self.slots[slot_name] = None
+            self.add_item(item)
+            print(f"Zdjęto przedmiot: {item.name} ze slotu {slot_name}")
         else:
-            print(f"❌ Przedmiot {item_name} nie został znaleziony.")
-
-    def show_inventory(self):
-        print("🎒 Twój ekwipunek:")
-        if not self.items:
-            print("  - pusty -")
-        for item in self.items:
-            print("-", item)
+            print("Slot pusty lub nie istnieje.")
 
     def show_equipment(self):
-        print("🧙 Wyposażenie postaci:")
-        for slot in self.slots.values():
-            print("-", slot)
+        print("Wyposażenie:")
+        for slot, item in self.slots.items():
+            print(f"{slot.title()}: {item.name if item else 'pusty'}")
 
-    def filter_items(self, item_type):
-        filtered = [item for item in self.items if item.type == item_type]
-        print(f"🔍 Przedmioty typu {item_type}:")
-        for item in filtered:
-            print("-", item)
-
-    def upgrade_item(self, item_name):
+    def show_inventory(self):
+        print("Ekwipunek:")
         for item in self.items:
-            if item.name == item_name:
-                if item.level < 15:
-                    item.level += 1
-                    item.power += 2
-                    print(f"🔧 Ulepszono: {item.name} do poziomu {item.level}")
-                else:
-                    print(f"⚠️ {item.name} osiągnął maksymalny poziom.")
-                return
-        print(f"❌ Nie znaleziono przedmiotu: {item_name}")
+            print(item)
 
-# Test (można zakomentować)
-if __name__ == "__main__":
-    inv = Inventory()
-    inv.add_item(Item("Hełm Cienia", "zbroja", power=5, description="Hełm z mrocznej stali", rarity="rzadki"))
-    inv.add_item(Item("Mikstura Mocy", "mikstura", power=15, usable=True, description="Zwiększa siłę"))
-    inv.add_item(Item("Runa Ognia", "runiczny", power=8, rarity="epicki", description="Runa zwiększająca obrażenia od ognia"))
-    inv.show_inventory()
-    inv.equip_item("głowa", "Hełm Cienia")
-    inv.show_equipment()
-    inv.use_item("Mikstura Mocy")
-    inv.upgrade_item("Runa Ognia")
+    def filter_items(self, type_filter=None):
+        if type_filter:
+            return [item for item in self.items if item.type == type_filter]
+        return self.items
