@@ -1,93 +1,64 @@
+# marketplace.py — Firos: Magic & Magic
+# Pełny system handlu: przedmioty, karty NFT, waluty RFN/TON
 
-# marketplace.py – Rozbudowany system handlu graczy
-# Uwzględnia wymiany: przedmioty, NFT, RFN/TON, barter
-# Opodatkowanie handlu: 12% NFT, 5% RFN/TON, 0% barter
-# System ofert, filtrów, historii, klasowych ograniczeń i wag
-
-import uuid
-import json
-from datetime import datetime
-
-class TradeOffer:
-    def __init__(self, offer_id, seller_id, offered_item, requested_item, offer_type, tax_rate=0.0):
-        self.offer_id = offer_id
-        self.seller_id = seller_id
-        self.offered_item = offered_item
-        self.requested_item = requested_item
-        self.offer_type = offer_type  # "item", "nft", "rfnt", "barter"
-        self.tax_rate = tax_rate
-        self.timestamp = datetime.utcnow().isoformat()
-
-    def calculate_tax(self):
-        if self.offer_type in ["nft", "rfnt"]:
-            return round(self.offered_item.get("value", 0) * self.tax_rate, 2)
-        return 0
-
-    def to_dict(self):
-        return {
-            "offer_id": self.offer_id,
-            "seller_id": self.seller_id,
-            "offered_item": self.offered_item,
-            "requested_item": self.requested_item,
-            "offer_type": self.offer_type,
-            "tax_rate": self.tax_rate,
-            "timestamp": self.timestamp
-        }
+class Item:
+    def __init__(self, name, description, rarity, price_rfn, price_ton):
+        self.name = name
+        self.description = description
+        self.rarity = rarity
+        self.price_rfn = price_rfn
+        self.price_ton = price_ton
 
 class Marketplace:
     def __init__(self):
-        self.offers = {}
+        self.items = []  # lista przedmiotów dostępnych
+        self.transactions = []  # historia transakcji
 
-    def create_offer(self, seller_id, offered_item, requested_item, offer_type):
-        tax = 0.12 if offer_type == "nft" else 0.05 if offer_type == "rfnt" else 0.0
-        offer_id = str(uuid.uuid4())
-        offer = TradeOffer(offer_id, seller_id, offered_item, requested_item, offer_type, tax)
-        self.offers[offer_id] = offer
-        print(f"🛒 Oferta {offer_id} została wystawiona.")
-        return offer_id
+    def add_item(self, item):
+        self.items.append(item)
 
-    def remove_offer(self, offer_id):
-        if offer_id in self.offers:
-            del self.offers[offer_id]
-            print(f"❌ Oferta {offer_id} została usunięta.")
-        else:
-            print("⚠️ Oferta nie istnieje.")
+    def remove_item(self, item_name):
+        self.items = [i for i in self.items if i.name != item_name]
 
-    def get_all_offers(self, filter_type=None):
-        return [
-            offer.to_dict() for offer in self.offers.values()
-            if filter_type is None or offer.offer_type == filter_type
-        ]
+    def list_items(self):
+        return [{
+            "name": item.name,
+            "rarity": item.rarity,
+            "RFN": item.price_rfn,
+            "TON": item.price_ton
+        } for item in self.items]
 
-    def accept_offer(self, offer_id, buyer_id):
-        offer = self.offers.get(offer_id)
-        if not offer:
-            print("⚠️ Nie znaleziono oferty.")
-            return None
+    def buy_item(self, item_name, buyer, currency):
+        for item in self.items:
+            if item.name == item_name:
+                if currency == "RFN" and buyer.rfn >= item.price_rfn:
+                    buyer.rfn -= item.price_rfn
+                    self.transactions.append((buyer.name, item_name, "RFN"))
+                    return f"{buyer.name} kupił {item.name} za {item.price_rfn} RFN"
+                elif currency == "TON" and buyer.ton >= item.price_ton:
+                    buyer.ton -= item.price_ton
+                    self.transactions.append((buyer.name, item_name, "TON"))
+                    return f"{buyer.name} kupił {item.name} za {item.price_ton} TON"
+                else:
+                    return "Nie masz wystarczających środków!"
+        return "Przedmiot nie istnieje!"
 
-        tax = offer.calculate_tax()
-        print(f"✅ {buyer_id} zaakceptował ofertę {offer_id}. Podatek: {tax}")
-        self.remove_offer(offer_id)
-        return offer.to_dict()
+# Przykładowy użytkownik
+class Player:
+    def __init__(self, name, rfn, ton):
+        self.name = name
+        self.rfn = rfn
+        self.ton = ton
 
-    def save_marketplace(self, path="marketplace_data.json"):
-        with open(path, "w") as f:
-            json.dump({k: v.to_dict() for k, v in self.offers.items()}, f, indent=4)
-
-    def load_marketplace(self, path="marketplace_data.json"):
-        try:
-            with open(path, "r") as f:
-                data = json.load(f)
-                for k, v in data.items():
-                    offer = TradeOffer(**v)
-                    self.offers[k] = offer
-        except FileNotFoundError:
-            print("🔍 Brak wcześniejszych ofert.")
-
-# Przykład użycia
+# Przykład działania
 if __name__ == "__main__":
-    mp = Marketplace()
-    mp.create_offer("gracz123", {"name": "Miecz Elfów", "value": 300}, {"rfnt": 350}, "nft")
-    mp.create_offer("gracz456", {"name": "Mikstura Lodu", "value": 25}, {"name": "Mikstura Ognia"}, "barter")
-    mp.accept_offer(list(mp.offers.keys())[0], "gracz789")
-    mp.save_marketplace()
+    marketplace = Marketplace()
+    sword = Item("Miecz Runiczny", "Starożytny miecz o mocy ognia", "epicki", 200, 0.5)
+    nft_card = Item("Karta Bohatera: Żarogniew", "Unikalna karta NFT", "legendarna", 0, 1.2)
+
+    marketplace.add_item(sword)
+    marketplace.add_item(nft_card)
+
+    gracz = Player("Wiedźmograd", 500, 2.0)
+    print(marketplace.buy_item("Miecz Runiczny", gracz, "RFN"))
+    print(marketplace.buy_item("Karta Bohatera: Żarogniew", gracz, "TON"))
