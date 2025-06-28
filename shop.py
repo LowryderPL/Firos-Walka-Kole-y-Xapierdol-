@@ -1,46 +1,43 @@
-shop.py - Pełny system sklepu FIROS: Magic & Magic
 
-import random from inventory import Inventory from items_data import SHOP_ITEMS from currencies import player_rfm_balance, deduct_rfm
+import random
+from inventory import add_item_to_inventory
+from currencies import get_player_rfm, deduct_player_rfm
+from items_data import get_available_items
+from nft_marketplace import list_nft_for_sale, buy_nft
+from gui_framework import display_shop_gui
 
-class Shop: def init(self): self.stock = [] self.refresh_stock()
+# Stałe
+MAX_SHOP_ITEMS = 12
 
-def refresh_stock(self):
-    """Losuje nowe przedmioty do sklepu"""
-    self.stock = random.sample(SHOP_ITEMS, min(len(SHOP_ITEMS), 12))
+# Przedmioty dostępne do zakupu
+def generate_shop_inventory():
+    all_items = get_available_items()
+    return random.sample(all_items, min(MAX_SHOP_ITEMS, len(all_items)))
 
-def display_stock(self):
-    print("--- Sklep FIROS ---")
-    for i, item in enumerate(self.stock):
-        print(f"{i+1}. {item['name']} - {item['price']} RFM")
-    print("-------------------")
-
-def buy_item(self, player_inventory, choice):
-    if 1 <= choice <= len(self.stock):
-        item = self.stock[choice - 1]
-        if player_rfm_balance() >= item['price']:
-            deduct_rfm(item['price'])
-            player_inventory.add_item(item)
-            print(f"Zakupiono: {item['name']}")
-        else:
-            print("Nie masz wystarczająco RFM.")
+# Zakup przedmiotu za RFM
+def purchase_item(player_id, item):
+    player_rfm = get_player_rfm(player_id)
+    if player_rfm >= item['price']:
+        deduct_player_rfm(player_id, item['price'])
+        add_item_to_inventory(player_id, item)
+        return f"✔ Zakupiono: {item['name']}"
     else:
-        print("Niepoprawny wybór.")
+        return "❌ Brak wystarczających środków (RFM)"
 
-items_data.py - przykładowe przedmioty do sklepu
+# Główna funkcja sklepu
+def open_shop(player_id):
+    shop_inventory = generate_shop_inventory()
+    result = display_shop_gui(player_id, shop_inventory)
+    if result:
+        return purchase_item(player_id, result)
+    return "❌ Nie wybrano przedmiotu"
 
-SHOP_ITEMS = [ {"name": "Miecz Szeptów", "price": 120}, {"name": "Zbroja Wiecznego Cienia", "price": 200}, {"name": "Mikstura Regeneracji", "price": 30}, {"name": "Runa Ognia", "price": 85}, {"name": "Pergamin Zatrucia", "price": 60}, {"name": "Zwoj Wiedźmy", "price": 150}, {"name": "Eliksir Siły", "price": 75}, {"name": "Talizman Ciernia", "price": 95}, {"name": "Zbroja Dźwiękowa", "price": 190}, {"name": "Hełm Mgielnego Kruka", "price": 110}, {"name": "Szkatułka Kruka", "price": 60}, {"name": "Złota Skrzynia", "price": 250}, ]
+# Handel NFT
+def handle_nft_transaction(buyer_id, seller_id, nft_id, price):
+    success = buy_nft(buyer_id, seller_id, nft_id, price)
+    return "✔ NFT zakupione" if success else "❌ Zakup NFT nie powiódł się"
 
-currencies.py (funkcje przykładowe)
-
-def player_rfm_balance(): return 500  # przykładowo
-
-def deduct_rfm(amount): print(f"[DEBUG] Odjęto {amount} RFM")
-
-inventory.py (fragment interfejsu dodawania)
-
-class Inventory: def init(self): self.items = []
-
-def add_item(self, item):
-    self.items.append(item)
-    print(f"Dodano do plecaka: {item['name']}")
-
+# Funkcja testowa
+if __name__ == "__main__":
+    sample_player = "test_player_001"
+    print(open_shop(sample_player))
