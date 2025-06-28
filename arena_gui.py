@@ -1,56 +1,84 @@
 # arena_gui.py
 
-import tkinter as tk
-from tkinter import ttk, messagebox
+import time
+import sys
+import random
 from arena import ArenaBattle, ARENA_TYPES
-from player import current_player
+from ui_elements import print_with_border, pause, clear_screen
+from player_profile import load_player_profile
+from core_save_load import save_game_state
+from core_ranking import display_ranking
 
-class ArenaGUI:
-    def __init__(self, root, player):
-        self.root = root
-        self.player = player
-        self.root.title("Arena Walki – Firos")
-        self.root.geometry("680x500")
-        self.create_widgets()
+def slow_type(text, delay=0.03):
+    for c in text:
+        sys.stdout.write(c)
+        sys.stdout.flush()
+        time.sleep(delay)
+    print()
 
-    def create_widgets(self):
-        title = ttk.Label(self.root, text="🛡️ Arena Walki – Firos: Magic & Magic", font=("Garamond", 18, "bold"))
-        title.pack(pady=10)
+def animated_loading(text="Ładowanie Areny"):
+    for i in range(3):
+        sys.stdout.write(f"\r{text}{'.' * (i + 1)}   ")
+        sys.stdout.flush()
+        time.sleep(0.5)
+    print()
 
-        self.type_label = ttk.Label(self.root, text="Wybierz typ Areny:")
-        self.type_label.pack()
+def display_arena_menu(player):
+    clear_screen()
+    print_with_border("🛡️ ARENA BITEW 🛡️")
+    print("Wybierz typ Areny:\n")
+    for idx, arena_type in enumerate(ARENA_TYPES):
+        print(f" {idx + 1}. {arena_type}")
+    print(" 0. Powrót")
 
-        self.arena_type_var = tk.StringVar()
-        self.arena_dropdown = ttk.Combobox(self.root, textvariable=self.arena_type_var, values=ARENA_TYPES, state="readonly", width=30)
-        self.arena_dropdown.current(0)
-        self.arena_dropdown.pack(pady=5)
+    choice = input("\nTwój wybór: ").strip()
+    if choice == "0":
+        return
 
-        self.start_button = ttk.Button(self.root, text="Rozpocznij Pojedynek", command=self.start_battle)
-        self.start_button.pack(pady=10)
+    try:
+        choice_index = int(choice) - 1
+        if choice_index not in range(len(ARENA_TYPES)):
+            raise ValueError
+        selected_type = ARENA_TYPES[choice_index]
+        handle_arena_battle(player, selected_type)
+    except ValueError:
+        print("Nieprawidłowy wybór. Spróbuj ponownie.")
+        pause(1.5)
+        display_arena_menu(player)
 
-        self.output_text = tk.Text(self.root, height=20, width=80, bg="#191919", fg="#EEE", font=("Courier", 10))
-        self.output_text.pack(pady=10)
+def handle_arena_battle(player, arena_type):
+    clear_screen()
+    print_with_border(f"⚔️  Rozpoczynasz walkę na Arenie: {arena_type} ⚔️")
+    animated_loading("Przywoływanie przeciwnika")
+    arena = ArenaBattle(player, arena_type=arena_type, is_ranked=True)
+    logs = arena.start_battle()
 
-    def start_battle(self):
-        arena_type = self.arena_type_var.get()
-        self.output_text.delete("1.0", tk.END)
+    for line in logs:
+        slow_type(f" > {line}", delay=random.uniform(0.02, 0.06))
+        time.sleep(0.3)
 
-        self.output_text.insert(tk.END, f"🔷 Rozpoczynasz walkę na Arenie: {arena_type}\n")
-        battle = ArenaBattle(self.player, arena_type=arena_type, is_ranked=True)
-        result = battle.start_battle()
+    print("\n🔥 Walka zakończona! 🔥")
+    slow_type("🎁 Przydzielanie nagród...")
+    save_game_state(player)
+    pause(2)
+    post_arena_menu(player)
 
-        for line in result:
-            self.output_text.insert(tk.END, line + "\n")
-        self.output_text.insert(tk.END, "\n🎖️ Walka zakończona. Gratulacje!\n")
+def post_arena_menu(player):
+    print_with_border("🏆 Co dalej?")
+    print(" 1. Pokaż ranking")
+    print(" 2. Wróć do Areny")
+    print(" 0. Wyjście")
 
-def launch_arena_gui(player=None):
-    if player is None:
-        player = current_player  # domyślnie globalny gracz
-    root = tk.Tk()
-    app = ArenaGUI(root, player)
-    root.mainloop()
+    choice = input("Twój wybór: ").strip()
+    if choice == "1":
+        display_ranking()
+        post_arena_menu(player)
+    elif choice == "2":
+        display_arena_menu(player)
+    else:
+        slow_type("Powrót do gry...")
 
-# Testowe uruchomienie GUI (można zakomentować w grze)
-# if __name__ == "__main__":
-#     from player import current_player
-#     launch_arena_gui(current_player)
+# Test lokalny
+if __name__ == "__main__":
+    player = load_player_profile("default_player")
+    display_arena_menu(player)

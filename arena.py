@@ -8,15 +8,15 @@ from enemy import generate_enemy
 from xp_system import grant_xp
 from inventory import reward_loot
 from guilds import update_guild_score
-from map_system import reveal_location
-from crafting import drop_crafting_materials
-from events import trigger_random_event
 
-ARENA_TYPES = ["PvP", "PvE", "Frakcyjna", "Turniejowa", "Treningowa"]
+ARENA_TYPES = ["PvP", "PvE", "Frakcyjna", "Turniejowa"]
 ARENA_LOCATIONS = [
-    "Ruiny Zamku Eldur", "Kryształowa Dolina", "Arena Czaszek", 
-    "Sanktuarium Ognia", "Zatopione Podziemia", "Twierdza Mgły",
-    "Lochy Khar'tuun", "Podniebna Cytadela", "Zarżnięte Mokradła"
+    "Ruiny Zamku Eldur",
+    "Kryształowa Dolina",
+    "Arena Czaszek",
+    "Sanktuarium Ognia",
+    "Zatopione Podziemia",
+    "Twierdza Mgły"
 ]
 
 class ArenaBattle:
@@ -31,11 +31,12 @@ class ArenaBattle:
         if self.arena_type == "PvP":
             return self.find_online_opponent()
         else:
-            return generate_enemy(level=self.player.level, boss=(self.arena_type == "Turniejowa"))
+            return generate_enemy(level=self.player.level, boss=self.arena_type == "Turniejowa")
 
     def find_online_opponent(self):
+        # Placeholder — replace with real player pool
         fake_enemy = generate_enemy(level=self.player.level)
-        fake_enemy.name = "Widmo Gracza"
+        fake_enemy.name = "Cień Gracza"
         return fake_enemy
 
     def start_battle(self):
@@ -48,48 +49,44 @@ class ArenaBattle:
             self.player.attack(self.enemy)
             if self.enemy.is_alive():
                 self.enemy.attack(self.player)
-            time.sleep(0.15)
+            time.sleep(0.2)
         return self.resolve_battle()
 
     def resolve_battle(self):
         if self.player.is_alive():
-            self.battle_log.append("✅ Zwycięstwo!")
+            self.battle_log.append("Zwycięstwo!")
             reward_loot(self.player, difficulty="arena")
-            grant_xp(self.player, amount=50 + self.enemy.level * 12)
-            drop_crafting_materials(self.player, tier=self.enemy.level)
-            reveal_location(self.player, region="arena")
-            trigger_random_event(self.player, context="arena")
+            grant_xp(self.player, amount=50 + self.enemy.level * 10)
             if self.is_ranked:
                 update_player_ranking(self.player, result="win")
             if self.arena_type == "Frakcyjna":
                 update_guild_score(self.player.guild, points=10)
         else:
-            self.battle_log.append("❌ Porażka.")
+            self.battle_log.append("Porażka.")
             if self.is_ranked:
                 update_player_ranking(self.player, result="loss")
         save_game_state(self.player)
         return self.battle_log
 
+# Optional GUI launcher for arena
 def launch_arena_menu(player):
-    print("=== 🛡️ ARENA WALKI ===")
+    print("=== ARENA ===")
     for idx, arena in enumerate(ARENA_TYPES):
         print(f"{idx+1}. {arena}")
-    try:
-        choice = int(input("Wybierz typ areny: ")) - 1
-        arena_type = ARENA_TYPES[choice]
-        battle = ArenaBattle(player, arena_type=arena_type, is_ranked=True)
-        result = battle.start_battle()
-        for line in result:
-            print(line)
-    except (ValueError, IndexError):
-        print("Nieprawidłowy wybór.")
+    choice = int(input("Wybierz typ areny: ")) - 1
+    arena_type = ARENA_TYPES[choice]
+    battle = ArenaBattle(player, arena_type=arena_type, is_ranked=True)
+    result = battle.start_battle()
+    for line in result:
+        print(line)
 
+# Arena daily quest
 def arena_daily_challenge(player):
-    print("🔥 Codzienne wyzwanie Areny!")
+    print("Codzienne wyzwanie Areny!")
     enemy = generate_enemy(level=player.level + 2, boss=True)
     battle = ArenaBattle(player, arena_type="Turniejowa", is_ranked=False)
     battle.enemy = enemy
     result = battle.start_battle()
     for line in result:
         print(line)
-    print("🎁 Nagroda dzienna odebrana.")
+    print("Zakończono wyzwanie.")
