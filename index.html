@@ -1,54 +1,57 @@
 <!DOCTYPE html><html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FIROS: Magic & Magic</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Firos: Magic & Magic</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>FIROS: Magic & Magic</h1>
-    <p class="subtitle">Wejdź do mrocznego świata fantasy, zbieraj karty NFT, rozwijaj ekwipunek i tocz bitwy!</p>
-  </header>  <section class="menu">
-    <button onclick="navigate('map')">🗺️ Mapa</button>
-    <button onclick="navigate('inventory')">🧰 Ekwipunek</button>
-    <button onclick="navigate('nft')">🃏 Karty NFT</button>
-    <button onclick="navigate('crafting')">⚗️ Crafting</button>
-    <button onclick="navigate('quests')">📜 Misje</button>
-    <button onclick="navigate('bestiary')">👹 Bestiariusz</button>
+    <header>
+        <h1>FIROS: Magic & Magic</h1>
+        <p class="subtitle">Wejdź do mrocznego świata fantasy, zbieraj karty NFT, rozwijaj bohatera i walcz!</p>
+    </header><section class="menu">
+    <button onclick="navigate('inventory')">🎒 Ekwipunek</button>
     <button onclick="navigate('market')">🪙 Marketplace</button>
+    <button onclick="navigate('nft')">🃏 Karty NFT</button>
+    <button onclick="navigate('quests')">📜 Misje</button>
     <button onclick="navigate('battle')">⚔️ Bitwa</button>
-  </section>  <main id="content">
-    <p>Wybierz zakładkę powyżej, aby rozpocząć przygodę.</p>
-  </main>  <footer>
-    <p>&copy; 2025 Firos Game Studio | Powered by TON & RFN</p>
-  </footer>  <script>
-    function navigate(view) {
-      const content = document.getElementById("content");
-      content.innerHTML = `<p>Wczytywanie sekcji: <strong>${view}</strong>...</p>`;
+    <button onclick="navigate('crafting')">🧪 Crafting</button>
+    <button onclick="navigate('bestiary')">🐉 Bestiariusz</button>
+</section>
 
-      if (view === "inventory") {
-        fetch("items.json")
-          .then(response => response.json())
-          .then(data => {
-            content.innerHTML = "<h2>🧰 Ekwipunek Gracza</h2>";
-            data.forEach(item => {
-              content.innerHTML += `
-                <div style="margin-bottom:10px;border-bottom:1px solid #555;padding:5px;">
-                  <strong>${item.name}</strong> (${item.type}, ${item.rarity})<br>
-                  Moc: ${item.power ?? 0} | Obrona: ${item.defense ?? 0} | Magia: ${item.magic ?? 0}<br>
-                  <em>${item.description}</em>
-                </div>
-              `;
+<main id="content">
+    <p>Witaj Bohaterze! Wybierz zakładkę, aby rozpocząć przygodę.</p>
+</main>
+
+<footer>
+    <p>&copy; 2025 Firos: Magic & Magic | Powered by TON & RFN</p>
+</footer>
+
+<script>
+    async function navigate(view) {
+        const content = document.getElementById('content');
+        content.innerHTML = `<p>Wczytywanie sekcji: <strong>${view}</strong>...</p>`;
+
+        if(view === 'inventory') {
+            const response = await fetch('items.json');
+            const items = await response.json();
+            let html = '<h2>🎒 Twój Ekwipunek</h2><ul class="inventory">';
+            items.forEach(item => {
+                html += `<li><strong>${item.name}</strong><br>
+                         Typ: ${item.type}<br>
+                         Rzadkość: ${item.rarity}<br>
+                         Moc: ${item.power}<br>
+                         Obrona: ${item.defense || 0}<br>
+                         Magia: ${item.magic || 0}<br>
+                         Opis: ${item.description}</li><hr>`;
             });
-          })
-          .catch(err => {
-            content.innerHTML = "<p>❌ Błąd wczytywania ekwipunku.</p>";
-            console.error("Błąd:", err);
-          });
-      } else {
-        content.innerHTML = `<p>📂 Sekcja <strong>${view}</strong> jest w trakcie tworzenia.</p>`;
-      }
+            html += '</ul>';
+            content.innerHTML = html;
+        } else {
+            content.innerHTML = `<h2>${view}</h2><p>Tutaj wkrótce będzie treść sekcji <strong>${view}</strong>.</p>`;
+        }
     }
-  </script></body>
+</script>
+
+</body>
 </html>
