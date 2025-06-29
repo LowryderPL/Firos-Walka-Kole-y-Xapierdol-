@@ -1,61 +1,51 @@
-import sys
-from inventory import show_inventory, pokaz_nft_w_ekwipunku
-from quests import start_quest, list_quests
-from spellbook import list_spells
-from rituals import list_rituals
-from map_system import show_map
-from alchemy import show_alchemy_options
-from game_engine import start_game
-from marketplace_logic import show_marketplace
+from marketplace_logic import Marketplace
 
-def display_menu():
-    print("""
-====================================
-     🔮 FIROS: MAGIC & MAGIC 🔮
-====================================
- 1. Rozpocznij grę
- 2. Mapa świata
- 3. Ekwipunek
- 4. Karty NFT
- 5. Questy i Misje
- 6. Księga zaklęć
- 7. Rytuały i zaklęcia
- 8. Alchemia i crafting
- 9. Marketplace NFT / RFN
-10. Wyjście z gry
-====================================
-""")
+def show_main_menu():
+    print("=== Świat Firos: Magic & Magic ===")
+    print("1. Ekwipunek")
+    print("2. Zadania")
+    print("3. Bestiariusz")
+    print("4. Spellbook / Rytuały")
+    print("5. Marketplace")
+    print("6. Wyjście")
 
-def handle_choice(choice):
-    if choice == "1":
-        start_game()
-    elif choice == "2":
-        show_map()
-    elif choice == "3":
-        show_inventory()
-    elif choice == "4":
-        pokaz_nft_w_ekwipunku()
-    elif choice == "5":
-        list_quests()
-    elif choice == "6":
-        list_spells()
-    elif choice == "7":
-        list_rituals()
-    elif choice == "8":
-        show_alchemy_options()
-    elif choice == "9":
-        show_marketplace()
-    elif choice == "10":
-        print("Do zobaczenia w świecie FIROS...")
-        sys.exit()
-    else:
-        print("Nieprawidłowy wybór. Wybierz ponownie.")
+def show_marketplace():
+    marketplace = Marketplace()
+    print("\n=== MARKETPLACE ===")
+    print("Dostępne oferty:")
+    offers = marketplace.list_offers()
+    for offer in offers:
+        print(f"ID: {offer['id']} | {offer['name']} | {offer['rarity']} | TON: {offer.get('price_ton')} | RFN: {offer.get('price_rfn')}")
+    choice = input("Podaj ID przedmiotu do zakupu lub ENTER aby wrócić: ")
+    if choice:
+        item = marketplace.get_offer_by_id(int(choice))
+        if item:
+            currency = input("Zapłać [TON/RFN]: ").upper()
+            result = marketplace.purchase_item(item["id"], buyer="Gracz1", currency=currency)
+            print(result)
+        else:
+            print("Nieprawidłowy ID.")
+    print()
 
-def main():
+def run_game_menu():
     while True:
-        display_menu()
-        choice = input("Wybierz opcję: ")
-        handle_choice(choice)
+        show_main_menu()
+        option = input("Wybierz opcję: ")
+        if option == "1":
+            print("[EKWIPUNEK] (placeholder)")
+        elif option == "2":
+            print("[ZADANIA] (placeholder)")
+        elif option == "3":
+            print("[BESTIARIUSZ] (placeholder)")
+        elif option == "4":
+            print("[SPELLBOOK / RYTUAŁY] (placeholder)")
+        elif option == "5":
+            show_marketplace()
+        elif option == "6":
+            print("Do zobaczenia!")
+            break
+        else:
+            print("Nieprawidłowy wybór.\n")
 
 if __name__ == "__main__":
-    main()
+    run_game_menu()
