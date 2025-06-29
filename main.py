@@ -1,61 +1,78 @@
-import logging
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import telebot
+from menu import show_main_menu
+from inventory import get_user_inventory
+from crafting_logic import handle_crafting_action
+from marketplace_logic import handle_marketplace_action
+from questy import handle_quest_action
+from bosses import handle_boss_action
+from nft_loader import load_nft_data
+import random
 
-# === IMPORTY SYSTEMOWE ===
-from marketplace_logic import handle_marketplace
-from inventory import show_inventory
-from questy import handle_quest_menu
-from bosses import handle_boss_battle
-from nft_cards import handle_nft_display
-from spell_crafting import handle_spell_crafting
+BOT_TOKEN = "TU_WSTAW_TOKEN"
+bot = telebot.TeleBot(BOT_TOKEN)
 
-# === KONFIGURACJA ===
-API_TOKEN = 'TWOJ_TOKEN_TUTAJ'
-logging.basicConfig(level=logging.INFO)
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+user_states = {}
+nft_data = load_nft_data()
 
-# === MENU GŁÓWNE ===
-def get_main_menu():
-    keyboard = InlineKeyboardMarkup(row_width=2)
-    keyboard.add(
-        InlineKeyboardButton("🗺 Mapa", callback_data="map"),
-        InlineKeyboardButton("🎒 Ekwipunek", callback_data="inventory"),
-        InlineKeyboardButton("🧪 Crafting Zaklęć", callback_data="crafting"),
-        InlineKeyboardButton("📜 Questy", callback_data="quests"),
-        InlineKeyboardButton("👹 Bossowie", callback_data="bosses"),
-        InlineKeyboardButton("🃏 Karty NFT", callback_data="nft"),
-        InlineKeyboardButton("🛒 Marketplace", callback_data="market")
-    )
-    return keyboard
+@bot.message_handler(commands=['start'])
+def start_game(message):
+    user_id = message.from_user.id
+    user_states[user_id] = {
+        'inventory': get_user_inventory(user_id),
+        'nft': [],
+        'rfm': 100,
+        'ton': 0.5,
+        'active_menu': 'main'
+    }
 
-# === START KOMENDY ===
-@dp.message_handler(commands=['start'])
-async def start_handler(message: types.Message):
-    await message.answer("🌟 Witaj w świecie Firos!", reply_markup=get_main_menu())
+    quote = random.choice([
+        "„Stary świat płonie, nowy się rodzi w cieniu miecza.”",
+        "„Tylko głupcy nie boją się potworów.”",
+        "„Firos nie przebacza – nagradza lub zabiera.”"
+    ])
+    bot.send_message(message.chat.id, f"🔥 Witaj w świecie Firos 🔥\n\n{quote}")
+    show_main_menu(bot, message.chat.id)
 
-# === CALLBACKS ===
-@dp.callback_query_handler(lambda c: True)
-async def handle_callbacks(callback_query: types.CallbackQuery):
-    data = callback_query.data
+@bot.callback_query_handler(func=lambda call: True)
+def handle_menu(call):
+    user_id = call.from_user.id
+    state = user_states.get(user_id)
+
+    if not state:
+        bot.send_message(call.message.chat.id, "Użyj /start, by rozpocząć grę.")
+        return
+
+    data = call.data
+
     if data == "inventory":
-        await show_inventory(callback_query)
-    elif data == "market":
-        await handle_marketplace(callback_query)
-    elif data == "quests":
-        await handle_quest_menu(callback_query)
-    elif data == "bosses":
-        await handle_boss_battle(callback_query)
-    elif data == "nft":
-        await handle_nft_display(callback_query)
+        items = get_user_inventory(user_id)
+        inv_text = "\n".join(f"- {item}" for item in items)
+        bot.send_message(call.message.chat.id, f"🎒 Twoje przedmioty:\n{inv_text}")
     elif data == "crafting":
-        await handle_spell_crafting(callback_query)
-    elif data == "map":
-        await callback_query.message.edit_text("🗺 Tu będzie mapa świata Firos (w przygotowaniu)...")
+        handle_crafting_action(bot, call.message.chat.id, state)
+    elif data == "marketplace":
+        handle_marketplace_action(bot, call.message.chat.id, state)
+    elif data == "questy":
+        handle_quest_action(bot, call.message.chat.id, state)
+    elif data == "boss":
+        handle_boss_action(bot, call.message.chat.id, state)
+    elif data == "menu":
+        show_main_menu(bot, call.message.chat.id)
     else:
-        await callback_query.message.edit_text("Nieznana opcja.")
+        bot.send_message(call.message.chat.id, "Nieznana akcja.")
 
-# === URUCHOMIENIE BOTA ===
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+# Losowe zdarzenia co 5 interakcji
+def random_event():
+    return random.choice([
+        "🔮 Tajemniczy kupiec oferuje wymianę NFT.",
+        "💥 Znalazłeś fragment zaklęcia – sprawdź crafting.",
+        "🧪 Trafiasz na alchemika, który może coś stworzyć."
+    ])
+
+# Dodaj losowe zdarzenie co jakiś czas
+@bot.message_handler(func=lambda m: True)
+def idle_chat(m):
+    if random.randint(1, 5) == 3:
+        bot.send_message(m.chat.id, random_event())
+
+bot.polling(none_stop=True)
