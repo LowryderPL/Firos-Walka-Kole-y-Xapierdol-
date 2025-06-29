@@ -82,3 +82,31 @@ class Inventory:
         if type_filter:
             return [item for item in self.items if item.type == type_filter]
         return self.items
+        # ====================
+# MODUŁ OBSŁUGI NFT
+# ====================
+import sqlite3
+
+def pokaz_nft_z_bazy(db_path="firos_game_database.db"):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT name, rarity, attributes, power, value FROM nft_inventory")
+        nft_items = cursor.fetchall()
+
+        if not nft_items:
+            print("Brak NFT w Twoim ekwipunku.")
+        else:
+            print("🎴 Kolekcja NFT:")
+            for name, rarity, attributes, power, value in nft_items:
+                print(f"🃏 {name} ({rarity}) | Moc: {power} | Wartość: {value} | Atrybuty: {attributes}")
+
+    except sqlite3.OperationalError:
+        print("⚠️ Tabela 'nft_inventory' nie istnieje. Upewnij się, że baza została zainicjalizowana.")
+
+    conn.close()
+
+# Przykład użycia do testu:
+if __name__ == "__main__":
+    pokaz_nft_z_bazy()
