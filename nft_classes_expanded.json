@@ -4,7 +4,7 @@
       "id": "znachorka_01",
       "name": "Znachorka",
       "rarity": "epic",
-      "description": "Mistrzyni eliksirów i leczenia. Specjalizuje się w magii natury i zielarstwie.",
+      "description": "Mistrzyni eliksirów i leczenia. Specjalizuje się w zielarstwie i alchemii.",
       "levels": [
         "Znachorka Level 1",
         "Znachorka Level 2",
@@ -16,6 +16,8 @@
         "Korzeń Wieszczki"
       ],
       "special_nft": "Korzeń Wieszczki",
+      "drop_location": "Ruins of Koroth",
+      "required_for_quests": ["Leczenie Rannego Króla", "Rytuał Wiosny"],
       "attributes": {
         "intelligence": 8,
         "alchemy": 10,
@@ -29,17 +31,12 @@
       "id": "berserker_01",
       "name": "Berserker z Gór",
       "rarity": "rare",
-      "description": "Nieustraszony wojownik władający toporem. Opętany szałem bitewnym.",
-      "levels": [
-        "Berserker Level 1",
-        "Berserker Level 2",
-        "Berserker Level 3"
-      ],
-      "crafting": [
-        "Kamień Furii",
-        "Kość Trolla"
-      ],
+      "description": "Wojownik opętany szałem bitewnym. Zwiększa siłę drużyny w PvP.",
+      "levels": ["Berserker 1", "Berserker 2", "Berserker 3"],
+      "crafting": ["Kamień Furii", "Kość Trolla"],
       "special_nft": "Runa Krwi",
+      "drop_location": "Jaskinia Bestii",
+      "required_for_quests": ["Zemsta za Klan", "Rozpalenie Ognia Wojny"],
       "attributes": {
         "strength": 10,
         "rage": 9,
@@ -52,18 +49,12 @@
       "id": "nekromanta_01",
       "name": "Nekromanta",
       "rarity": "legendary",
-      "description": "Władca śmierci i ciemności. Ożywia trupy i przyzywa demony.",
-      "levels": [
-        "Nekromanta Level 1",
-        "Nekromanta Level 2",
-        "Nekromanta Level 3"
-      ],
-      "crafting": [
-        "Proch Umarłych",
-        "Zwoje Cienia",
-        "Krew Demona"
-      ],
+      "description": "Władca ciemności, potrafi przywoływać umarłych. Kluczowy do misji z demonami.",
+      "levels": ["Nekromanta 1", "Nekromanta 2", "Nekromanta 3"],
+      "crafting": ["Proch Umarłych", "Zwoje Cienia", "Krew Demona"],
       "special_nft": "Księga Wiecznego Mroku",
+      "drop_location": "Cmentarz Dzikich Królów",
+      "required_for_quests": ["Przyzwanie Armii Cieni", "Przeklęta Wieża"],
       "attributes": {
         "dark_magic": 10,
         "mana": 9,
@@ -76,17 +67,12 @@
       "id": "łowca_elfów_01",
       "name": "Łowca Elfów",
       "rarity": "uncommon",
-      "description": "Zwinny tropiciel, wyspecjalizowany w walce z istotami magicznymi.",
-      "levels": [
-        "Łowca Level 1",
-        "Łowca Level 2",
-        "Łowca Level 3"
-      ],
-      "crafting": [
-        "Strzała Żywiołu",
-        "Pazur Mantykory"
-      ],
+      "description": "Tropiciel i łowca magicznych stworzeń. Zwiększa szanse na loot z bossów.",
+      "levels": ["Łowca 1", "Łowca 2", "Łowca 3"],
+      "crafting": ["Strzała Żywiołu", "Pazur Mantykory"],
       "special_nft": "Tarcza Ciszy",
+      "drop_location": "Las Martwych Elfów",
+      "required_for_quests": ["Polowanie na Widma", "Zabójstwo Królowej"],
       "attributes": {
         "dexterity": 8,
         "tracking": 9,
@@ -99,17 +85,12 @@
       "id": "mnich_ognia_01",
       "name": "Mnich Ognia",
       "rarity": "epic",
-      "description": "Kapłan Zakonu Płonącej Góry, władca zaklęć ognia i oczyszczenia.",
-      "levels": [
-        "Mnich Level 1",
-        "Mnich Level 2",
-        "Mnich Level 3"
-      ],
-      "crafting": [
-        "Płomień Duszy",
-        "Popiół Feniksa"
-      ],
+      "description": "Kapłan Zakonu Płonącej Góry. Potężny mag ofensywny.",
+      "levels": ["Mnich 1", "Mnich 2", "Mnich 3"],
+      "crafting": ["Płomień Duszy", "Popiół Feniksa"],
       "special_nft": "Korona Żaru",
+      "drop_location": "Wulkan Yesoroth",
+      "required_for_quests": ["Oczyszczenie Świątyni", "Zatrzymanie Krwawiącej Mgły"],
       "attributes": {
         "fire_magic": 9,
         "wisdom": 8,
