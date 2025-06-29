@@ -1,174 +1,122 @@
-[
+{
+  "nft_classes": [
     {
-        "id": "nft_class_001",
-        "name": "Znachorka",
-        "description": "Mistrzyni eliksirów i leczenia. Specjalizuje się w miksturach i ziołach.",
-        "crafting_items": [
-            "Eliksir Wilczego Kła",
-            "Zioła Snów",
-            "Woda z Topieliska"
-        ],
-        "special_nft": "Korzeń Wieszczki",
-        "level_nfts": [
-            "Znachorka Level 1",
-            "Znachorka Level 2",
-            "Znachorka Level 3",
-            "Znachorka Level 4",
-            "Znachorka Level 5",
-            "Znachorka Level 6",
-            "Znachorka Level 7",
-            "Znachorka Level 8",
-            "Znachorka Level 9",
-            "Znachorka Level 10"
-        ],
-        "rarity": "epic",
-        "obtainable": {
-            "drop": [
-                "Boss: Topielica",
-                "Quest: Cienie Lasu"
-            ],
-            "crafting": true,
-            "marketplace": [
-                "TON",
-                "RFN"
-            ]
-        }
+      "id": "znachorka_01",
+      "name": "Znachorka",
+      "rarity": "epic",
+      "description": "Mistrzyni eliksirów i leczenia. Specjalizuje się w magii natury i zielarstwie.",
+      "levels": [
+        "Znachorka Level 1",
+        "Znachorka Level 2",
+        "Znachorka Level 3"
+      ],
+      "crafting": [
+        "Eliksir Wilczego Kła",
+        "Zioła Snów",
+        "Korzeń Wieszczki"
+      ],
+      "special_nft": "Korzeń Wieszczki",
+      "attributes": {
+        "intelligence": 8,
+        "alchemy": 10,
+        "healing": 9,
+        "defense": 4
+      },
+      "available_in": ["TON", "RFN"],
+      "icon": "icon_refenthon.png"
     },
     {
-        "id": "nft_class_002",
-        "name": "Czarnoksiężnik Krwi",
-        "description": "Włada mocą ofiary i krwi. Używa potężnych rytuałów.",
-        "crafting_items": [
-            "Kamień Żyły",
-            "Zbrylona Krew",
-            "Pieczęć Ofiary"
-        ],
-        "special_nft": "Czaszka Krwawego Kręgu",
-        "level_nfts": [
-            "Czarnoksiężnik Krwi Level 1",
-            "Czarnoksiężnik Krwi Level 2",
-            "Czarnoksiężnik Krwi Level 3",
-            "Czarnoksiężnik Krwi Level 4",
-            "Czarnoksiężnik Krwi Level 5",
-            "Czarnoksiężnik Krwi Level 6",
-            "Czarnoksiężnik Krwi Level 7",
-            "Czarnoksiężnik Krwi Level 8",
-            "Czarnoksiężnik Krwi Level 9",
-            "Czarnoksiężnik Krwi Level 10"
-        ],
-        "rarity": "legendary",
-        "obtainable": {
-            "drop": [
-                "Boss: Krwawy Król",
-                "Quest: Rytuał Cienia"
-            ],
-            "crafting": true,
-            "marketplace": [
-                "TON"
-            ]
-        }
+      "id": "berserker_01",
+      "name": "Berserker z Gór",
+      "rarity": "rare",
+      "description": "Nieustraszony wojownik władający toporem. Opętany szałem bitewnym.",
+      "levels": [
+        "Berserker Level 1",
+        "Berserker Level 2",
+        "Berserker Level 3"
+      ],
+      "crafting": [
+        "Kamień Furii",
+        "Kość Trolla"
+      ],
+      "special_nft": "Runa Krwi",
+      "attributes": {
+        "strength": 10,
+        "rage": 9,
+        "defense": 6,
+        "speed": 4
+      },
+      "available_in": ["RFN"]
     },
     {
-        "id": "nft_class_003",
-        "name": "Łowca Cienia",
-        "description": "Zabójca działający z ukrycia. Zabija zanim go zobaczysz.",
-        "crafting_items": [
-            "Łuk Szeptu",
-            "Strzały Cierni",
-            "Pazur Wilka"
-        ],
-        "special_nft": "Kaptur Nocy",
-        "level_nfts": [
-            "Łowca Cienia Level 1",
-            "Łowca Cienia Level 2",
-            "Łowca Cienia Level 3",
-            "Łowca Cienia Level 4",
-            "Łowca Cienia Level 5",
-            "Łowca Cienia Level 6",
-            "Łowca Cienia Level 7",
-            "Łowca Cienia Level 8",
-            "Łowca Cienia Level 9",
-            "Łowca Cienia Level 10"
-        ],
-        "rarity": "rare",
-        "obtainable": {
-            "drop": [
-                "Boss: Cień Z Puszczy",
-                "Quest: Tropienie Ducha"
-            ],
-            "crafting": false,
-            "marketplace": [
-                "TON",
-                "RFN"
-            ]
-        }
+      "id": "nekromanta_01",
+      "name": "Nekromanta",
+      "rarity": "legendary",
+      "description": "Władca śmierci i ciemności. Ożywia trupy i przyzywa demony.",
+      "levels": [
+        "Nekromanta Level 1",
+        "Nekromanta Level 2",
+        "Nekromanta Level 3"
+      ],
+      "crafting": [
+        "Proch Umarłych",
+        "Zwoje Cienia",
+        "Krew Demona"
+      ],
+      "special_nft": "Księga Wiecznego Mroku",
+      "attributes": {
+        "dark_magic": 10,
+        "mana": 9,
+        "control": 7,
+        "speed": 3
+      },
+      "available_in": ["TON"]
     },
     {
-        "id": "nft_class_004",
-        "name": "Rycerz Zakonu",
-        "description": "Obrońca prawa i wiary. Noszący ciężką zbroję i miecz światłości.",
-        "crafting_items": [
-            "Miecz Zakonu",
-            "Pancerz Czystości",
-            "Księga Światła"
-        ],
-        "special_nft": "Hełm Ocalenia",
-        "level_nfts": [
-            "Rycerz Zakonu Level 1",
-            "Rycerz Zakonu Level 2",
-            "Rycerz Zakonu Level 3",
-            "Rycerz Zakonu Level 4",
-            "Rycerz Zakonu Level 5",
-            "Rycerz Zakonu Level 6",
-            "Rycerz Zakonu Level 7",
-            "Rycerz Zakonu Level 8",
-            "Rycerz Zakonu Level 9",
-            "Rycerz Zakonu Level 10"
-        ],
-        "rarity": "epic",
-        "obtainable": {
-            "drop": [
-                "Boss: Upadły Templariusz",
-                "Quest: Ostatni Bastion"
-            ],
-            "crafting": true,
-            "marketplace": [
-                "RFN"
-            ]
-        }
+      "id": "łowca_elfów_01",
+      "name": "Łowca Elfów",
+      "rarity": "uncommon",
+      "description": "Zwinny tropiciel, wyspecjalizowany w walce z istotami magicznymi.",
+      "levels": [
+        "Łowca Level 1",
+        "Łowca Level 2",
+        "Łowca Level 3"
+      ],
+      "crafting": [
+        "Strzała Żywiołu",
+        "Pazur Mantykory"
+      ],
+      "special_nft": "Tarcza Ciszy",
+      "attributes": {
+        "dexterity": 8,
+        "tracking": 9,
+        "archery": 10,
+        "stealth": 7
+      },
+      "available_in": ["RFN"]
     },
     {
-        "id": "nft_class_005",
-        "name": "Wiedźmin Wędrowny",
-        "description": "Samotny wojownik i pogromca potworów, wędrujący bez przynależności.",
-        "crafting_items": [
-            "Eliksir Jaskółki",
-            "Stalowy Miecz",
-            "Znak Igni"
-        ],
-        "special_nft": "Amulet Szkoły Wilka",
-        "level_nfts": [
-            "Wiedźmin Level 1",
-            "Wiedźmin Level 2",
-            "Wiedźmin Level 3",
-            "Wiedźmin Level 4",
-            "Wiedźmin Level 5",
-            "Wiedźmin Level 6",
-            "Wiedźmin Level 7",
-            "Wiedźmin Level 8",
-            "Wiedźmin Level 9",
-            "Wiedźmin Level 10"
-        ],
-        "rarity": "legendary",
-        "obtainable": {
-            "drop": [
-                "Boss: Starszy Upiór",
-                "Quest: Tropienie Zła"
-            ],
-            "crafting": false,
-            "marketplace": [
-                "TON"
-            ]
-        }
+      "id": "mnich_ognia_01",
+      "name": "Mnich Ognia",
+      "rarity": "epic",
+      "description": "Kapłan Zakonu Płonącej Góry, władca zaklęć ognia i oczyszczenia.",
+      "levels": [
+        "Mnich Level 1",
+        "Mnich Level 2",
+        "Mnich Level 3"
+      ],
+      "crafting": [
+        "Płomień Duszy",
+        "Popiół Feniksa"
+      ],
+      "special_nft": "Korona Żaru",
+      "attributes": {
+        "fire_magic": 9,
+        "wisdom": 8,
+        "resistance": 6,
+        "charisma": 5
+      },
+      "available_in": ["TON", "RFN"]
     }
-]
+  ]
+}
