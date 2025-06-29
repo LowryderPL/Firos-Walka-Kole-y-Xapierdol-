@@ -4,6 +4,7 @@
     "type": "broń",
     "rarity": "epicki",
     "power": 120,
+    "defense": 20,
     "magic": 0,
     "description": "Przeklęty miecz wykuty z czarnego kamienia."
   },
