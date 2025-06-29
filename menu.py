@@ -1,92 +1,49 @@
-from marketplace_logic import Marketplace
-from inventory import Inventory
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CallbackContext
 
-def show_main_menu():
-    print("=== ŚWIAT FIROS: Magic & Magic ===")
-    print("1. Ekwipunek")
-    print("2. Zadania")
-    print("3. Bestiariusz")
-    print("4. Spellbook / Rytuały")
-    print("5. Marketplace (kupno/sprzedaż)")
-    print("6. Wyjście")
+def main_menu(update: Update, context: CallbackContext):
+    keyboard = [
+        [InlineKeyboardButton("🧭 Eksploruj", callback_data='explore')],
+        [InlineKeyboardButton("🎒 Ekwipunek", callback_data='inventory')],
+        [InlineKeyboardButton("📜 Misje", callback_data='quests')],
+        [InlineKeyboardButton("🏰 Miasta & Lokacje", callback_data='locations')],
+        [InlineKeyboardButton("🧪 Alchemia", callback_data='alchemy')],
+        [InlineKeyboardButton("🧙 Crafting Zaklęć", callback_data='spell_crafting')],
+        [InlineKeyboardButton("📈 Marketplace NFT", callback_data='marketplace')],
+        [InlineKeyboardButton("🏆 Ranking", callback_data='ranking')],
+        [InlineKeyboardButton("⚙️ Ustawienia", callback_data='settings')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text("🔮 *Główne Menu Firos: Magic & Magic* 🔮", reply_markup=reply_markup, parse_mode='Markdown')
 
-def show_inventory():
-    inventory = Inventory()
-    items = inventory.get_items()
-    print("\n=== TWÓJ EKWIPUNEK ===")
-    for i, item in enumerate(items):
-        print(f"{i+1}. {item['name']} | Typ: {item['type']} | Rzadkość: {item['rarity']}")
-    input("\nWciśnij ENTER aby wrócić do menu...")
+def handle_callback(update: Update, context: CallbackContext):
+    query = update.callback_query
+    query.answer()
 
-def show_marketplace():
-    marketplace = Marketplace()
-    print("\n=== MARKETPLACE ===")
-    print("1. Przeglądaj oferty")
-    print("2. Wystaw przedmiot")
-    print("3. Wróć")
-    choice = input("Wybierz opcję: ")
-    
-    if choice == "1":
-        offers = marketplace.list_offers()
-        print("\n--- OFERTY ---")
-        for offer in offers:
-            print(f"ID: {offer['id']} | {offer['name']} | Rzadkość: {offer['rarity']} | TON: {offer.get('price_ton')} | RFN: {offer.get('price_rfn')}")
-        id_choice = input("Podaj ID przedmiotu do zakupu lub ENTER aby wrócić: ")
-        if id_choice:
-            item = marketplace.get_offer_by_id(int(id_choice))
-            if item:
-                currency = input("Zapłać [TON/RFN]: ").upper()
-                result = marketplace.purchase_item(item["id"], buyer="Gracz1", currency=currency)
-                print(result)
-            else:
-                print("Nie znaleziono przedmiotu.")
-    elif choice == "2":
-        inventory = Inventory()
-        items = inventory.get_items()
-        print("\nTwoje przedmioty:")
-        for i, item in enumerate(items):
-            print(f"{i+1}. {item['name']} ({item['rarity']})")
-        pick = input("Wybierz numer przedmiotu do wystawienia: ")
-        try:
-            idx = int(pick) - 1
-            if 0 <= idx < len(items):
-                price_ton = input("Cena w TON (lub pusta): ")
-                price_rfn = input("Cena w RFN (lub pusta): ")
-                marketplace.add_offer(
-                    name=items[idx]["name"],
-                    seller="Gracz1",
-                    price_ton=float(price_ton) if price_ton else None,
-                    price_rfn=float(price_rfn) if price_rfn else None,
-                    rarity=items[idx]["rarity"],
-                    type=items[idx]["type"]
-                )
-                print("Przedmiot wystawiony!")
-            else:
-                print("Niepoprawny numer.")
-        except Exception as e:
-            print(f"Błąd: {e}")
+    if query.data == 'explore':
+        query.edit_message_text("🚶 Wyruszasz na eksplorację świata Firos...")
+    elif query.data == 'inventory':
+        from inventory import show_inventory
+        show_inventory(update, context)
+    elif query.data == 'quests':
+        from quests import show_quests
+        show_quests(update, context)
+    elif query.data == 'locations':
+        from locations import show_locations
+        show_locations(update, context)
+    elif query.data == 'alchemy':
+        from alchemy import open_alchemy_lab
+        open_alchemy_lab(update, context)
+    elif query.data == 'spell_crafting':
+        from spell_crafting import open_spell_crafting_ui
+        open_spell_crafting_ui(update, context)
+    elif query.data == 'marketplace':
+        from marketplace_logic import open_marketplace
+        open_marketplace(update, context)
+    elif query.data == 'ranking':
+        from ranking import show_ranking
+        show_ranking(update, context)
+    elif query.data == 'settings':
+        query.edit_message_text("⚙️ Ustawienia są w trakcie rozbudowy.")
     else:
-        return
-
-def run_game_menu():
-    while True:
-        show_main_menu()
-        option = input("Wybierz opcję: ")
-        if option == "1":
-            show_inventory()
-        elif option == "2":
-            print("[ZADANIA] – wkrótce.")
-        elif option == "3":
-            print("[BESTIARIUSZ] – wkrótce.")
-        elif option == "4":
-            print("[SPELLBOOK / RYTUAŁY] – wkrótce.")
-        elif option == "5":
-            show_marketplace()
-        elif option == "6":
-            print("Wyjście z gry.")
-            break
-        else:
-            print("Nieprawidłowy wybór.\n")
-
-if __name__ == "__main__":
-    run_game_menu()
+        query.edit_message_text("❓ Nierozpoznana opcja.")
