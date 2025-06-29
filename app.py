@@ -59,3 +59,43 @@ def get_quests():
 
 if __name__ == "__main__":
     app.run(debug=True)
+@app.route("/api/craft/<int:recipe_id>", methods=["POST"])
+def craft_item(recipe_id):
+    conn = sqlite3.connect("firos_inventory.db")
+    cursor = conn.cursor()
+
+    # Pobierz przepis
+    cursor.execute("SELECT name, ingredients, effect FROM crafting_recipes WHERE id = ?", (recipe_id,))
+    recipe = cursor.fetchone()
+
+    if not recipe:
+        conn.close()
+        return jsonify({"error": "Przepis nie istnieje"}), 404
+
+    name, ingredients_str, effect = recipe
+    ingredients = ingredients_str.split(',')
+
+    # Pobierz inventory
+    cursor.execute("SELECT name FROM inventory")
+    player_items = [row[0] for row in cursor.fetchall()]
+
+    # Sprawdź czy gracz ma wszystkie składniki
+    missing = [item for item in ingredients if item not in player_items]
+    if missing:
+        conn.close()
+        return jsonify({"error": "Brakuje składników", "missing": missing}), 400
+
+    # Usuń składniki z inventory
+    for item in ingredients:
+        cursor.execute("DELETE FROM inventory WHERE name = ? LIMIT 1", (item,))
+
+    # Dodaj nowe itemy (można rozbudować o statystyki, rarity itd.)
+    cursor.execute("""
+        INSERT INTO inventory (name, type, rarity, power, defense, magic)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (name, "craft", "crafted", 0, 0, 0))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True, "crafted": name})
