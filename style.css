@@ -1,110 +1,72 @@
+/* style.css – główny styl UI dla NFT, Inventory, Craftingu */
+
 body {
+  background-color: #0e0e0e;
+  font-family: 'Cinzel', serif;
+  color: #e0e0e0;
   margin: 0;
   padding: 0;
-  font-family: "Cinzel", serif;
-  background-color: #111;
-  color: #f0f0f0;
-  background-image: url('background_dark.jpg'); /* możesz podmienić */
-  background-size: cover;
-  background-attachment: fixed;
 }
 
-header {
-  text-align: center;
-  padding: 30px 20px 10px;
-  background-color: rgba(0, 0, 0, 0.8);
-  border-bottom: 2px solid #444;
-}
-
-h1 {
-  font-size: 3rem;
-  margin: 0;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: #e0c97d;
-  text-shadow: 2px 2px #000;
-}
-
-.subtitle {
-  font-size: 1.2rem;
-  color: #aaa;
-  font-style: italic;
-}
-
-.menu {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  padding: 20px;
-  background-color: #222;
-  border-bottom: 2px solid #333;
-}
-
-.menu button {
-  background-color: #2d2d2d;
-  border: 1px solid #555;
-  color: #f8f8f8;
-  font-size: 1rem;
-  margin: 5px;
-  padding: 10px 20px;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  font-family: "Cinzel", serif;
-}
-
-.menu button:hover {
-  background-color: #444;
-  transform: scale(1.05);
-  color: #e0c97d;
-}
-
-main {
-  padding: 40px;
-  max-width: 900px;
-  margin: auto;
-  background-color: rgba(10, 10, 10, 0.85);
-  border-radius: 8px;
-  margin-top: 20px;
+.nft-card {
+  border-radius: 12px;
+  background: #1c1c1c;
+  padding: 10px;
+  margin: 15px;
   box-shadow: 0 0 10px #000;
-}
-
-main h2 {
-  color: #ffd700;
-  font-size: 2rem;
-  border-bottom: 1px solid #333;
-  padding-bottom: 5px;
-}
-
-main ul {
-  list-style: none;
-  padding: 0;
-}
-
-main li {
-  padding: 10px 0;
-  border-bottom: 1px dashed #333;
-}
-
-main em {
-  color: #999;
-  font-style: italic;
-}
-
-footer {
+  width: 220px;
   text-align: center;
-  padding: 20px;
-  background-color: #1a1a1a;
-  color: #666;
-  font-size: 0.9rem;
-  margin-top: 40px;
-  border-top: 2px solid #333;
+  transition: 0.3s ease;
 }
 
-/* Dodatki */
-hr {
+.nft-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #bfa550;
+}
+
+.nft-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.nft-title {
+  font-size: 1.2em;
+  margin-top: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #f0e68c;
+}
+
+.nft-rarity {
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+
+.rarity-common { color: #ccc; }
+.rarity-rare { color: #6fa8dc; }
+.rarity-epic { color: #a64dff; }
+.rarity-legendary { color: #ffb347; }
+.rarity-cursed { color: #e61919; }
+
+.stats {
+  font-size: 0.85em;
+  margin-top: 8px;
+  color: #aaa;
+}
+
+button.action-button {
+  background: #bfa550;
   border: none;
-  height: 1px;
-  background-color: #333;
-  margin: 10px 0;
+  color: #000;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button.action-button:hover {
+  background: #d7c36e;
 }
