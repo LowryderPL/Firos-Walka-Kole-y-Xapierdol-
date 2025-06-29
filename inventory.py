@@ -127,3 +127,10 @@ class Inventory:
             "obrona": random.randint(base, base + 2),
             "szansa_krytyka": round(random.uniform(0.5, 5.0), 2)
         }
+def update_item_level(user_id, item_id, increment):
+    for item in USERS[user_id]['inventory']:
+        if item['id'] == item_id:
+            item['level'] += increment
+            if item['level'] > 15:
+                item['level'] = 15
+            break
