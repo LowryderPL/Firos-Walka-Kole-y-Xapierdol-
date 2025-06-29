@@ -1,38 +1,28 @@
-
-# Finalna wersja inventory.py łącząca pełną funkcjonalność i rozszerzenia
+import sqlite3
 
 class Item:
-    def __init__(self, name, type, power=0, weight=0, value=0, description=""):
+    def __init__(self, name, weight, type_):
         self.name = name
-        self.type = type  # np. "broń", "zbroja", "mikstura"
-        self.power = power
         self.weight = weight
-        self.value = value
-        self.description = description
+        self.type_ = type_
 
     def __str__(self):
-        return f"{self.name} ({self.type}) - Moc: {self.power}, Waga: {self.weight}, Wartość: {self.value}"
+        return f"{self.name} ({self.type_}, {self.weight} kg)"
+
+
+class NFTItem:
+    def __init__(self, name, rarity, power, bonus_effect):
+        self.name = name
+        self.rarity = rarity
+        self.power = power
+        self.bonus_effect = bonus_effect
+
+    def __str__(self):
+        return f"[{self.rarity}] {self.name} – Moc: {self.power} | Efekt: {self.bonus_effect}"
+
 
 class Inventory:
-    def __init__(self, max_weight=150):
-        self.slots = {
-            "głowa": None,
-            "tors": None,
-            "nogi": None,
-            "buty": None,
-            "broń": None,
-            "tarcza": None,
-            "pierścień1": None,
-            "pierścień2": None,
-            "plecak": None,
-            "pas": None,
-            "zwój": None,
-            "artefakt": None,
-            "zwierzę": None,
-            "skrzydła": None,
-            "runiczny_slot": None,
-            "crafting_slot": None
-        }
+    def __init__(self, max_weight=50):
         self.items = []
         self.max_weight = max_weight
 
@@ -42,71 +32,57 @@ class Inventory:
     def add_item(self, item):
         if self.current_weight() + item.weight <= self.max_weight:
             self.items.append(item)
-            print(f"Dodano przedmiot: {item}")
+            print(f"✅ Dodano: {item}")
         else:
-            print("Nie możesz dodać tego przedmiotu. Zbyt duża waga!")
+            print("❌ Przekroczono limit wagi!")
 
-    def remove_item(self, item_name):
-        self.items = [item for item in self.items if item.name != item_name]
-
-    def equip_item(self, item):
-        if item.type in self.slots:
-            if self.slots[item.type] is None:
-                self.slots[item.type] = item
-                print(f"Wyposażono: {item.name} w slot {item.type}")
-            else:
-                print(f"Slot {item.type} jest już zajęty przez {self.slots[item.type].name}")
-        else:
-            print(f"Nieznany typ przedmiotu: {item.type}")
-
-    def unequip_item(self, slot_name):
-        if slot_name in self.slots and self.slots[slot_name] is not None:
-            item = self.slots[slot_name]
-            self.slots[slot_name] = None
-            self.add_item(item)
-            print(f"Zdjęto przedmiot: {item.name} ze slotu {slot_name}")
-        else:
-            print("Slot pusty lub nie istnieje.")
-
-    def show_equipment(self):
-        print("Wyposażenie:")
-        for slot, item in self.slots.items():
-            print(f"{slot.title()}: {item.name if item else 'pusty'}")
+    def remove_item(self, name):
+        for item in self.items:
+            if item.name == name:
+                self.items.remove(item)
+                print(f"🗑️ Usunięto: {item}")
+                return
+        print("❌ Przedmiot nie znaleziony.")
 
     def show_inventory(self):
-        print("Ekwipunek:")
+        print("=== 🎒 Ekwipunek ===")
         for item in self.items:
             print(item)
+        print(f"🔸 Obciążenie: {self.current_weight()}/{self.max_weight} kg")
 
-    def filter_items(self, type_filter=None):
-        if type_filter:
-            return [item for item in self.items if item.type == type_filter]
-        return self.items
-        # ====================
-# MODUŁ OBSŁUGI NFT
-# ====================
-import sqlite3
+    def filter_inventory(self, type_):
+        print(f"=== 📦 Filtr: {type_} ===")
+        for item in self.items:
+            if item.type_ == type_:
+                print(item)
 
-def pokaz_nft_z_bazy(db_path="firos_game_database.db"):
+
+def pokaz_nft_w_ekwipunku(db_path="firos_game_database.db"):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT name, rarity, attributes, power, value FROM nft_inventory")
+        cursor.execute("SELECT name, rarity, power, bonus_effect FROM nft_inventory")
         nft_items = cursor.fetchall()
-
-        if not nft_items:
-            print("Brak NFT w Twoim ekwipunku.")
-        else:
-            print("🎴 Kolekcja NFT:")
-            for name, rarity, attributes, power, value in nft_items:
-                print(f"🃏 {name} ({rarity}) | Moc: {power} | Wartość: {value} | Atrybuty: {attributes}")
-
     except sqlite3.OperationalError:
-        print("⚠️ Tabela 'nft_inventory' nie istnieje. Upewnij się, że baza została zainicjalizowana.")
+        print("⚠️ Tabela NFT nie istnieje.")
+        conn.close()
+        return
 
     conn.close()
 
-# Przykład użycia do testu:
+    if nft_items:
+        print("\n=== 🎴 Twoje NFT ===")
+        for nft in nft_items:
+            print(NFTItem(*nft))
+    else:
+        print("\nBrak NFT w ekwipunku.")
+
+
+# 🔄 Przykład użycia
 if __name__ == "__main__":
-    pokaz_nft_z_bazy()
+    inv = Inventory()
+    inv.add_item(Item("Zbroja Wilka", 7, "Zbroja"))
+    inv.add_item(Item("Miecz Cienia", 4, "Broń"))
+    inv.show_inventory()
+    pokaz_nft_w_ekwipunku()
