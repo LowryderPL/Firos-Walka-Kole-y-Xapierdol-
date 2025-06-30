@@ -3,6 +3,7 @@ from telegram.ext import CommandHandler, CallbackQueryHandler, ContextTypes
 from inventory import get_user_inventory
 from crafting_logic import attempt_craft
 from marketplace_logic import list_market_items
+InlineKeyboardButton("🛒 Marketplace", callback_data="menu_market")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
