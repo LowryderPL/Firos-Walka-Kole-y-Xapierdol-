@@ -1,58 +1,62 @@
-# marketplace_logic.py
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from database import (
-    get_market_items,
-    add_market_item,
-    remove_market_item,
-    get_player_inventory,
-    update_inventory_item,
-    get_player_ton_balance,
-    update_player_ton_balance
-)
+# Lista przedmiotów dostępnych w marketplace
+market_items = [
+    {"id": "nft_001", "name": "⚔️ Miecz Cienia", "price_rfn": 30, "price_ton": 0.2},
+    {"id": "nft_002", "name": "🛡️ Zbroja Duszy", "price_rfn": 50, "price_ton": 0.35},
+    {"id": "nft_003", "name": "🔥 Runa Płomienia", "price_rfn": 20, "price_ton": 0.1},
+]
 
-TON_FEE_PERCENT = 12
-RFN_FEE_PERCENT = 5
-RARE_ONLY_TON = ["legendarny", "boski"]
+# Funkcja otwierająca marketplace
+def handle_marketplace_action(bot, user_id):
+    markup = InlineKeyboardMarkup()
+    for item in market_items:
+        markup.row_width = 2
+        markup.add(
+            InlineKeyboardButton(f"{item['name']} – {item['price_rfn']} RFN", callback_data=f"buy_rfn_{item['id']}"),
+            InlineKeyboardButton(f"{item['price_ton']} TON", callback_data=f"buy_ton_{item['id']}")
+        )
+    bot.send_message(user_id, "🏪 *Marketplace NFT – wybierz przedmiot do zakupu:*", reply_markup=markup, parse_mode="Markdown")
 
-def list_item_for_sale(player_id, item_id, price, currency="TON"):
-    inventory = get_player_inventory(player_id)
-    item = next((i for i in inventory if i['id'] == item_id), None)
-    
-    if not item:
-        return "❌ Nie masz takiego przedmiotu."
-    
-    if item["rarity"] in RARE_ONLY_TON and currency != "TON":
-        return "❌ Ten przedmiot można sprzedać tylko za TON."
+# Funkcja obsługująca kliknięcia w marketplace
+def handle_marketplace_callback(bot, callback_query, user_states):
+    user_id = callback_query.from_user.id
+    data = callback_query.data
 
-    item_to_sell = {
-        "id": item_id,
-        "player_id": player_id,
-        "item": item,
-        "price": price,
-        "currency": currency
-    }
+    if user_id not in user_states:
+        user_states[user_id] = {
+            "inventory": [],
+            "rfm": 100,
+            "ton": 0.5,
+            "nft": [],
+            "active_menu": "main"
+        }
 
-    add_market_item(item_to_sell)
-    return f"✅ Wystawiono {item['name']} za {price} {currency}."
+    user = user_states[user_id]
 
-def buy_market_item(buyer_id, item_id):
-    item = get_market_items().get(item_id)
-    if not item:
-        return "❌ Przedmiot nie istnieje lub został już kupiony."
+    for item in market_items:
+        if data == f"buy_rfn_{item['id']}":
+            if user["rfm"] >= item["price_rfn"]:
+                user["rfm"] -= item["price_rfn"]
+                user["inventory"].append(item["name"])
+                bot.answer_callback_query(callback_query.id, text=f"✅ Kupiono {item['name']} za RFN!")
+                bot.edit_message_text(f"🛒 Zakupiono {item['name']} za {item['price_rfn']} RFN.",
+                                      chat_id=callback_query.message.chat.id,
+                                      message_id=callback_query.message.message_id)
+            else:
+                bot.answer_callback_query(callback_query.id, text="❌ Za mało RFN!")
+            return
 
-    price = item["price"]
-    currency = item["currency"]
-    fee = price * (TON_FEE_PERCENT if currency == "TON" else RFN_FEE_PERCENT) / 100
+        elif data == f"buy_ton_{item['id']}":
+            if user["ton"] >= item["price_ton"]:
+                user["ton"] -= item["price_ton"]
+                user["inventory"].append(item["name"])
+                bot.answer_callback_query(callback_query.id, text=f"✅ Kupiono {item['name']} za TON!")
+                bot.edit_message_text(f"🛒 Zakupiono {item['name']} za {item['price_ton']} TON.",
+                                      chat_id=callback_query.message.chat.id,
+                                      message_id=callback_query.message.message_id)
+            else:
+                bot.answer_callback_query(callback_query.id, text="❌ Za mało TON!")
+            return
 
-    if currency == "TON":
-        balance = get_player_ton_balance(buyer_id)
-        if balance < price:
-            return "❌ Nie masz wystarczająco TON."
-        update_player_ton_balance(buyer_id, -price)
-        update_player_ton_balance("OWNER", fee)
-    else:
-        return "❌ RFN jeszcze nieobsługiwane w tej wersji."
-
-    update_inventory_item(buyer_id, item["item"])
-    remove_market_item(item_id)
-    return f"✅ Kupiłeś {item['item']['name']} za {price} {currency}."
+    bot.answer_callback_query(callback_query.id, text="❓ Nieznana opcja.")
