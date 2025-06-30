@@ -7,7 +7,8 @@ from questy import handle_quest_action
 from bosses import handle_boss_action
 from nft_cards import load_nft_data
 from npc_dialogue import start_dialog, handle_dialog_callback
-
+from marketplace_gui import register_marketplace_handlers
+register_marketplace_handlers(dp)
 BOT_TOKEN = "7842760543:AAHFbxnbifJYlGHWjTCfIgJVNfl_Dd7ttRM"  # Twój rzeczywisty token
 bot = telebot.TeleBot(BOT_TOKEN)
 
