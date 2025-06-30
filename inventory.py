@@ -1,76 +1,54 @@
-import json
-import os
+# inventory.py
 
-INVENTORY_FILE = "data/inventory.json"
+from aiogram import types
+from aiogram.dispatcher import FSMContext
+from loader import dp
+from utils.db_api.db_commands import get_user_inventory, remove_item, upgrade_item
+from keyboards.inline.inventory_buttons import inventory_menu, upgrade_confirm_buttons
+from states.inventory_states import InventoryStates
 
-def load_inventory():
-    if not os.path.exists(INVENTORY_FILE):
-        with open(INVENTORY_FILE, "w") as f:
-            json.dump({}, f)
-    with open(INVENTORY_FILE, "r") as f:
-        return json.load(f)
+@dp.message_handler(commands=["inventory"])
+async def show_inventory(message: types.Message):
+    inventory = await get_user_inventory(user_id=message.from_user.id)
+    if not inventory:
+        await message.answer("🧳 Twój ekwipunek jest pusty.")
+        return
 
-def save_inventory(inventory):
-    with open(INVENTORY_FILE, "w") as f:
-        json.dump(inventory, f, indent=4)
+    msg = "🎒 Twoje przedmioty:\n\n"
+    for item in inventory:
+        rarity = item.get("rarity", "Zwykły")
+        lvl = item.get("level", 1)
+        msg += f"🔹 {item['name']} | 🧬 Rzadkość: {rarity} | 📈 Poziom: {lvl}\n"
 
-def get_user_inventory(user_id):
-    inventory = load_inventory()
-    uid = str(user_id)
-    if uid not in inventory:
-        inventory[uid] = {
-            "ton": 0.0,
-            "rfn": 0,
-            "nft": [],
-            "items": [],
-            "books": [],
-            "quests_done": [],
-            "crafted": [],
-            "daily_limit": {"crafts": 0},
-        }
-        save_inventory(inventory)
-    return inventory[uid]
+    await message.answer(msg, reply_markup=inventory_menu)
 
-def update_user_inventory(user_id, data):
-    inventory = load_inventory()
-    inventory[str(user_id)] = data
-    save_inventory(inventory)
+@dp.callback_query_handler(lambda c: c.data.startswith("upgrade_"))
+async def initiate_upgrade(call: types.CallbackQuery, state: FSMContext):
+    item_id = call.data.split("_")[1]
+    await state.update_data(item_id=item_id)
+    await call.message.edit_text("🛠️ Czy chcesz ulepszyć ten przedmiot?\nKoszt: 0.9 TON\nSzansa: 60%",
+                                 reply_markup=upgrade_confirm_buttons)
+    await state.set_state(InventoryStates.ConfirmUpgrade)
 
-def add_item_to_inventory(user_id, item_id):
-    inventory = get_user_inventory(user_id)
-    inventory['items'].append(item_id)
-    update_user_inventory(user_id, inventory)
+@dp.callback_query_handler(text="upgrade_yes", state=InventoryStates.ConfirmUpgrade)
+async def perform_upgrade(call: types.CallbackQuery, state: FSMContext):
+    from random import randint, choice
+    data = await state.get_data()
+    item_id = data["item_id"]
+    user_id = call.from_user.id
 
-def add_nft_to_inventory(user_id, nft_id):
-    inventory = get_user_inventory(user_id)
-    inventory['nft'].append(nft_id)
-    update_user_inventory(user_id, inventory)
+    roll = randint(1, 100)
+    if roll <= 60:
+        await upgrade_item(user_id, item_id)
+        await call.message.edit_text("✅ Ulepszenie zakończone sukcesem! 🔥")
+    else:
+        fallback = choice(["🪓 Złamany młotek – ale znalazłeś inny przedmiot!", "💥 Eksplozja! Przedmiot zniszczony, ale zdobywasz odłamek!"])
+        await remove_item(user_id, item_id)
+        await call.message.edit_text(f"❌ Niepowodzenie! {fallback}")
 
-def deduct_ton(user_id, amount):
-    inventory = get_user_inventory(user_id)
-    if inventory['ton'] >= amount:
-        inventory['ton'] -= amount
-        update_user_inventory(user_id, inventory)
-        return True
-    return False
+    await state.finish()
 
-def add_ton(user_id, amount):
-    inventory = get_user_inventory(user_id)
-    inventory['ton'] += amount
-    update_user_inventory(user_id, inventory)
-
-def add_rfn(user_id, amount):
-    inventory = get_user_inventory(user_id)
-    inventory['rfn'] += amount
-    update_user_inventory(user_id, inventory)
-
-def inventory_to_string(user_id):
-    inv = get_user_inventory(user_id)
-    nft_list = '\n'.join(inv['nft']) or "Brak"
-    item_list = '\n'.join(inv['items']) or "Brak"
-    return (
-        f"💰 TON: {inv['ton']}\n"
-        f"🪙 RFN: {inv['rfn']}\n"
-        f"📦 Przedmioty:\n{item_list}\n"
-        f"🃏 Karty NFT:\n{nft_list}"
-    )
+@dp.callback_query_handler(text="upgrade_no", state=InventoryStates.ConfirmUpgrade)
+async def cancel_upgrade(call: types.CallbackQuery, state: FSMContext):
+    await call.message.edit_text("❎ Anulowano ulepszanie.")
+    await state.finish()
