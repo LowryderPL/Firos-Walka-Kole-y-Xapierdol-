@@ -1,26 +1,108 @@
-# inventory_gui.py – GUI ekwipunku postaci
+import tkinter as tk
+from tkinter import messagebox
 
 class InventoryGUI:
-    def __init__(self, inventory):
+    def __init__(self, master, inventory, character_class):
+        self.master = master
+        self.master.title("Inventory GUI")
         self.inventory = inventory
+        self.character_class = character_class
+        self.weight_limit = 100  # Max weight
 
-    def display(self):
-        print("\n📦 Ekwipunek postaci:")
-        for i, item in enumerate(self.inventory.items, start=1):
-            print(f"{i}. {item.name} (typ: {item.type}, moc: {item.power})")
+        self.equipped_slots = {
+            "Head": None,
+            "Torso": None,
+            "Arms": None,
+            "Legs": None,
+            "Main Weapon": None,
+            "Off-Hand": None,
+            "Backpack": None,
+            "Belt": None,
+            "Amulet": None,
+            "Ring Left": None,
+            "Ring Right": None,
+            "Rune": None
+        }
 
-        print("\n🎽 Wyposażenie:")
-        for slot, equipment in self.inventory.slots.items():
-            print(f"{slot}: {equipment.item.name if equipment.item else '-'}")
+        self.create_widgets()
+        self.update_inventory_display()
 
-        print(f"\nWaga: {self.inventory.get_total_weight()} / {self.inventory.weight_limit} kg")
+    def create_widgets(self):
+        tk.Label(self.master, text="Inventory Items:").grid(row=0, column=0)
+        self.inventory_listbox = tk.Listbox(self.master, width=40)
+        self.inventory_listbox.grid(row=1, column=0, rowspan=10)
+        self.inventory_listbox.bind('<Double-1>', self.equip_item)
 
-    def show_item_details(self, item_name):
-        item = next((i for i in self.inventory.items if i.name == item_name), None)
-        if item:
-            print(f"🔍 Szczegóły: {item.name}")
-            print(f"Typ: {item.type}")
-            print(f"Moc: {item.power}")
-            print(f"Waga: {item.weight}")
-        else:
-            print(f"❌ Nie znaleziono przedmiotu o nazwie: {item_name}")
+        tk.Label(self.master, text="Equipped Items:").grid(row=0, column=1)
+        self.equipped_labels = {}
+        for idx, slot in enumerate(self.equipped_slots.keys()):
+            tk.Label(self.master, text=f"{slot}:").grid(row=idx+1, column=1, sticky='e')
+            label = tk.Label(self.master, text="None", width=30)
+            label.grid(row=idx+1, column=2, sticky='w')
+            self.equipped_labels[slot] = label
+
+        self.weight_label = tk.Label(self.master, text="Total Weight: 0 / 100")
+        self.weight_label.grid(row=13, column=0, sticky='w')
+
+        self.burn_button = tk.Button(self.master, text="Burn Item for XP", command=self.burn_item)
+        self.burn_button.grid(row=14, column=0, pady=5)
+
+        self.craft_button = tk.Button(self.master, text="Open Crafting", command=self.open_crafting)
+        self.craft_button.grid(row=14, column=1)
+
+        self.alchemy_button = tk.Button(self.master, text="Open Alchemy", command=self.open_alchemy)
+        self.alchemy_button.grid(row=14, column=2)
+
+    def update_inventory_display(self):
+        self.inventory_listbox.delete(0, tk.END)
+        for item in self.inventory:
+            self.inventory_listbox.insert(tk.END, f"{item['name']} [{item['type']}]")
+
+        total_weight = sum(item['weight'] for item in self.inventory)
+        self.weight_label.config(text=f"Total Weight: {total_weight} / {self.weight_limit}")
+
+    def equip_item(self, event):
+        selection = self.inventory_listbox.curselection()
+        if not selection:
+            return
+        index = selection[0]
+        item = self.inventory[index]
+
+        if self.character_class not in item.get("allowed_classes", ["All"]):
+            messagebox.showwarning("Class Restriction", "Your class cannot equip this item.")
+            return
+
+        slot = item["slot"]
+        self.equipped_slots[slot] = item
+        self.equipped_labels[slot].config(text=item["name"])
+        del self.inventory[index]
+        self.update_inventory_display()
+
+    def burn_item(self):
+        selection = self.inventory_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Select an item to burn.")
+            return
+        index = selection[0]
+        item = self.inventory.pop(index)
+        messagebox.showinfo("Item Burned", f"You gained {item['value'] // 2} XP from burning {item['name']}.")
+        self.update_inventory_display()
+
+    def open_crafting(self):
+        messagebox.showinfo("Crafting", "Crafting system opening...")
+
+    def open_alchemy(self):
+        messagebox.showinfo("Alchemy", "Alchemy system opening...")
+
+# Example usage:
+if __name__ == "__main__":
+    inventory = [
+        {"name": "Iron Helmet", "type": "Armor", "slot": "Head", "weight": 5, "value": 50, "allowed_classes": ["Warrior"]},
+        {"name": "Steel Sword", "type": "Weapon", "slot": "Main Weapon", "weight": 10, "value": 100, "allowed_classes": ["Warrior", "Rogue"]},
+        {"name": "Magic Rune", "type": "Rune", "slot": "Rune", "weight": 2, "value": 75, "allowed_classes": ["Mage"]},
+    ]
+    character_class = "Warrior"
+
+    root = tk.Tk()
+    app = InventoryGUI(root, inventory, character_class)
+    root.mainloop()
