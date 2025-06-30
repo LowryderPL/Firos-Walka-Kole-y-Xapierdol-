@@ -1,25 +1,21 @@
 import telebot
-from menu import show_main_menu
+from menu import run_bot
 from inventory import get_user_inventory
 from spell_crafting import handle_spell_crafting
-from marketplace_logic import handle_marketplace_action
+from marketplace_logic import handle_marketplace_action, handle_marketplace_callback
 from questy import handle_quest_action
 from bosses import handle_boss_action
 from nft_cards import load_nft_data
 from npc_dialogue import start_dialog, handle_dialog_callback
 
-from telegram.ext import CallbackQueryHandler
-import random
-
-# === KONFIGURACJA BOTA ===
-BOT_TOKEN = "TU_WSTAW_TOKEN"
+BOT_TOKEN = "7842760543:AAHFbxnbifJYlGHWjTCfIgJVNfl_Dd7ttRM"  # Twój rzeczywisty token
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# === DANE GRACZY I NFT ===
+# === STANY GRACZA ===
 user_states = {}
 nft_data = load_nft_data()
 
-# === START GRY ===
+# === START ===
 @bot.message_handler(commands=['start'])
 def start_game(message):
     user_id = message.from_user.id
@@ -30,10 +26,10 @@ def start_game(message):
         'ton': 0.5,
         'active_menu': 'main'
     }
-    bot.send_message(user_id, "🌟 Witaj w Świecie Firos! 🌌", reply_markup=show_main_menu())
+    bot.send_message(user_id, "🌟 Witaj w świecie *Firos: Magic & Magic*! Użyj menu poniżej, by rozpocząć przygodę.")
 
-# === CALLBACK HANDLER ===
-@bot.callback_query_handler(func=lambda c: True)
+# === CALLBACKI ===
+@bot.callback_query_handler(func=lambda call: True)
 def handle_callbacks(callback_query):
     user_id = callback_query.from_user.id
     data = callback_query.data
@@ -41,8 +37,8 @@ def handle_callbacks(callback_query):
     if data == "inventory":
         inv = get_user_inventory(user_id)
         bot.answer_callback_query(callback_query.id)
-        bot.send_message(user_id, f"🎒 Ekwipunek:\n{inv}")
-    
+        bot.send_message(user_id, f"📦 Ekwipunek:\n{inv}")
+
     elif data == "marketplace":
         handle_marketplace_action(bot, user_id)
 
@@ -61,10 +57,13 @@ def handle_callbacks(callback_query):
     elif data.startswith("dialog_"):
         handle_dialog_callback(bot, callback_query)
 
+    elif data.startswith("buy_") or data.startswith("sell_"):
+        handle_marketplace_callback(bot, callback_query)
+
     else:
         bot.send_message(user_id, "⚠️ Nieznana opcja.")
 
 # === URUCHOMIENIE BOTA ===
 if __name__ == '__main__':
-    print("Bot wystartował... 🔥")
+    print("✅ Bot Firos wystartował...")
     bot.infinity_polling()
