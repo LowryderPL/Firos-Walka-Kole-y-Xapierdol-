@@ -1,50 +1,58 @@
-import json
+# marketplace_logic.py
 
-class Marketplace:
-    def __init__(self, data_file="marketplace_data.json"):
-        with open(data_file, "r", encoding="utf-8") as f:
-            self.offers = json.load(f)
+from database import (
+    get_market_items,
+    add_market_item,
+    remove_market_item,
+    get_player_inventory,
+    update_inventory_item,
+    get_player_ton_balance,
+    update_player_ton_balance
+)
 
-    def list_offers(self, item_type=None):
-        if item_type:
-            return [offer for offer in self.offers if offer.get("type") == item_type]
-        return self.offers
+TON_FEE_PERCENT = 12
+RFN_FEE_PERCENT = 5
+RARE_ONLY_TON = ["legendarny", "boski"]
 
-    def get_offer_by_id(self, item_id):
-        for offer in self.offers:
-            if offer["id"] == item_id:
-                return offer
-        return None
+def list_item_for_sale(player_id, item_id, price, currency="TON"):
+    inventory = get_player_inventory(player_id)
+    item = next((i for i in inventory if i['id'] == item_id), None)
+    
+    if not item:
+        return "❌ Nie masz takiego przedmiotu."
+    
+    if item["rarity"] in RARE_ONLY_TON and currency != "TON":
+        return "❌ Ten przedmiot można sprzedać tylko za TON."
 
-    def filter_by_rarity(self, rarity):
-        return [offer for offer in self.offers if offer.get("rarity") == rarity]
+    item_to_sell = {
+        "id": item_id,
+        "player_id": player_id,
+        "item": item,
+        "price": price,
+        "currency": currency
+    }
 
-    def purchase_item(self, item_id, buyer, currency="TON"):
-        offer = self.get_offer_by_id(item_id)
-        if not offer:
-            return "Item not found."
+    add_market_item(item_to_sell)
+    return f"✅ Wystawiono {item['name']} za {price} {currency}."
 
-        if currency == "TON" and offer.get("price_ton"):
-            return f"{buyer} paid {offer['price_ton']} TON to {offer['seller']} for {offer['name']}"
-        elif currency == "RFN" and offer.get("price_rfn"):
-            return f"{buyer} paid {offer['price_rfn']} RFN to {offer['seller']} for {offer['name']}"
-        else:
-            return "Currency not accepted for this item."
+def buy_market_item(buyer_id, item_id):
+    item = get_market_items().get(item_id)
+    if not item:
+        return "❌ Przedmiot nie istnieje lub został już kupiony."
 
-    def add_offer(self, name, seller, price_ton=None, price_rfn=None, rarity="common", type="nft"):
-        new_offer = {
-            "id": len(self.offers) + 1,
-            "name": name,
-            "seller": seller,
-            "price_ton": price_ton,
-            "price_rfn": price_rfn,
-            "rarity": rarity,
-            "type": type
-        }
-        self.offers.append(new_offer)
-        self._save_data()
-        return new_offer
+    price = item["price"]
+    currency = item["currency"]
+    fee = price * (TON_FEE_PERCENT if currency == "TON" else RFN_FEE_PERCENT) / 100
 
-    def _save_data(self):
-        with open("marketplace_data.json", "w", encoding="utf-8") as f:
-            json.dump(self.offers, f, indent=2, ensure_ascii=False)
+    if currency == "TON":
+        balance = get_player_ton_balance(buyer_id)
+        if balance < price:
+            return "❌ Nie masz wystarczająco TON."
+        update_player_ton_balance(buyer_id, -price)
+        update_player_ton_balance("OWNER", fee)
+    else:
+        return "❌ RFN jeszcze nieobsługiwane w tej wersji."
+
+    update_inventory_item(buyer_id, item["item"])
+    remove_market_item(item_id)
+    return f"✅ Kupiłeś {item['item']['name']} za {price} {currency}."
