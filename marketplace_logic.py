@@ -1,43 +1,76 @@
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from inventory import get_user_inventory, update_user_inventory
-from nft_cards import get_card_by_id
+import json
+import os
+import random
 
-# Konfiguracja prowizji i cen
-MARKET_TAX_PERCENT = 12
-TON_EXCHANGE_RATE = 1.0  # 1 TON = 1 TON (na potrzeby demonstracyjne)
+MARKET_FILE = "market_data.json"
+INVENTORY_FOLDER = "inventories"
+OWNER_ADDRESS = "UQAnzg088aqSorf2rYteBGw6duFLYTR8VlxJv3QsXcALOKjP"
+MARKET_FEE = 0.15  # 15% prowizji
 
-market_items = [
-    {"id": "card001", "name": "Miecz Cienia", "price_ton": 0.8, "rarity": "rare"},
-    {"id": "card002", "name": "Zbroja Firosu", "price_ton": 1.2, "rarity": "epic"},
-    {"id": "card003", "name": "Smoczy Kryształ", "price_ton": 2.5, "rarity": "legendary"},
-]
+def load_market():
+    if not os.path.exists(MARKET_FILE):
+        return []
+    with open(MARKET_FILE, "r") as f:
+        return json.load(f)
 
-def handle_marketplace_action(bot, user_id):
-    markup = InlineKeyboardMarkup()
-    for item in market_items:
-        button = InlineKeyboardButton(
-            text=f"{item['name']} - {item['price_ton']} TON",
-            callback_data=f"buy_{item['id']}"
-        )
-        markup.add(button)
-    bot.send_message(user_id, "🛒 *Marketplace NFT – Firos*\nWybierz kartę do zakupu:", reply_markup=markup, parse_mode="Markdown")
+def save_market(market_data):
+    with open(MARKET_FILE, "w") as f:
+        json.dump(market_data, f, indent=2)
 
-def handle_marketplace_callback(bot, call):
-    user_id = call.from_user.id
-    data = call.data
+def list_market_items():
+    market = load_market()
+    return [f"{item['item']} - {item['price']} TON (sprzedawca: {item['user']})" for item in market]
 
-    if data.startswith("buy_"):
-        card_id = data.split("_")[1]
-        item = next((i for i in market_items if i['id'] == card_id), None)
-        if item:
-            user_inventory = get_user_inventory(user_id)
-            if user_inventory['ton'] >= item['price_ton']:
-                user_inventory['ton'] -= item['price_ton']
-                user_inventory['nft'].append(item['id'])
-                update_user_inventory(user_id, user_inventory)
-                bot.answer_callback_query(call.id)
-                bot.send_message(user_id, f"✅ Zakupiono: {item['name']} za {item['price_ton']} TON!")
-            else:
-                bot.answer_callback_query(call.id, "❌ Masz za mało TON.")
-        else:
-            bot.answer_callback_query(call.id, "⚠️ Nie znaleziono przedmiotu.")
+def add_item_to_market(user_id, item, price):
+    market = load_market()
+    market.append({
+        "user": user_id,
+        "item": item,
+        "price": round(price, 2)
+    })
+    save_market(market)
+
+def purchase_item(buyer_id, item_name):
+    market = load_market()
+    for item in market:
+        if item["item"].lower() == item_name.lower():
+            price = item["price"]
+            seller = item["user"]
+
+            # Prowizja
+            fee = round(price * MARKET_FEE, 2)
+            seller_gain = price - fee
+
+            # Dodaj do inventory kupującego
+            add_item_to_inventory(buyer_id, item_name)
+
+            # Drop bonusowy za zakup (losowy)
+            if random.random() < 0.25:
+                add_item_to_inventory(buyer_id, "🎁 Losowy bonus")
+
+            # Usuwamy z marketu
+            market.remove(item)
+            save_market(market)
+
+            return f"✅ Zakupiono {item_name} za {price} TON.\n💰 Sprzedawca otrzymał {seller_gain} TON\n💎 Prowizja: {fee} TON dla właściciela."
+
+    return "❌ Przedmiot niedostępny."
+
+def add_item_to_inventory(user_id, item):
+    inventory_path = os.path.join(INVENTORY_FOLDER, f"{user_id}.json")
+    if not os.path.exists(inventory_path):
+        data = {"items": []}
+    else:
+        with open(inventory_path, "r") as f:
+            data = json.load(f)
+
+    data["items"].append(item)
+    with open(inventory_path, "w") as f:
+        json.dump(data, f, indent=2)
+
+def get_user_inventory(user_id):
+    inventory_path = os.path.join(INVENTORY_FOLDER, f"{user_id}.json")
+    if not os.path.exists(inventory_path):
+        return {"items": []}
+    with open(inventory_path, "r") as f:
+        return json.load(f)
