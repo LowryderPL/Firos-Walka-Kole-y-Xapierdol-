@@ -2,6 +2,9 @@ from aiogram import types
 from aiogram.dispatcher import Dispatcher
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from marketplace_logic import (
+from marketplace_gui import register_marketplace_handlers
+register_marketplace_handlers(bot)
+
     list_market_items,
     purchase_item,
     add_item_to_market,
