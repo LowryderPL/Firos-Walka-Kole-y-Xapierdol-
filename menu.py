@@ -62,4 +62,6 @@ from menu import run_bot
 if name == 'main':
 
 run_bot()
+elif message.text == "🏪 Marketplace":
+    show_marketplace(message.chat.id)
 
