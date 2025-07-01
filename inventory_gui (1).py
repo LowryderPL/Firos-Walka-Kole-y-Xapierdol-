@@ -1,13 +1,16 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, Toplevel
 
 class InventoryGUI:
     def __init__(self, master, inventory, character_class):
         self.master = master
-        self.master.title("Inventory GUI")
+        self.master.title("Inventory")
         self.inventory = inventory
         self.character_class = character_class
-        self.weight_limit = 100  # Max weight
+        self.weight_limit = 100
+        self.player_xp = 0
+        self.player_level = 1
+        self.theme = "day"
 
         self.equipped_slots = {
             "Head": None,
@@ -32,6 +35,8 @@ class InventoryGUI:
         self.inventory_listbox = tk.Listbox(self.master, width=40)
         self.inventory_listbox.grid(row=1, column=0, rowspan=10)
         self.inventory_listbox.bind('<Double-1>', self.equip_item)
+        self.inventory_listbox.bind("<Enter>", self.show_tooltip)
+        self.inventory_listbox.bind("<Leave>", self.hide_tooltip)
 
         tk.Label(self.master, text="Equipped Items:").grid(row=0, column=1)
         self.equipped_labels = {}
@@ -44,6 +49,9 @@ class InventoryGUI:
         self.weight_label = tk.Label(self.master, text="Total Weight: 0 / 100")
         self.weight_label.grid(row=13, column=0, sticky='w')
 
+        self.xp_label = tk.Label(self.master, text="XP: 0 | Level: 1")
+        self.xp_label.grid(row=13, column=2, sticky='e')
+
         self.burn_button = tk.Button(self.master, text="Burn Item for XP", command=self.burn_item)
         self.burn_button.grid(row=14, column=0, pady=5)
 
@@ -53,13 +61,22 @@ class InventoryGUI:
         self.alchemy_button = tk.Button(self.master, text="Open Alchemy", command=self.open_alchemy)
         self.alchemy_button.grid(row=14, column=2)
 
+        self.theme_button = tk.Button(self.master, text="Toggle Theme", command=self.toggle_theme)
+        self.theme_button.grid(row=15, column=1)
+
     def update_inventory_display(self):
         self.inventory_listbox.delete(0, tk.END)
         for item in self.inventory:
+            color = "black"
+            rarity = item.get("rarity", "common")
+            if rarity == "rare": color = "blue"
+            elif rarity == "epic": color = "purple"
+            elif rarity == "legendary": color = "orange"
             self.inventory_listbox.insert(tk.END, f"{item['name']} [{item['type']}]")
 
         total_weight = sum(item['weight'] for item in self.inventory)
         self.weight_label.config(text=f"Total Weight: {total_weight} / {self.weight_limit}")
+        self.xp_label.config(text=f"XP: {self.player_xp} | Level: {self.player_level}")
 
     def equip_item(self, event):
         selection = self.inventory_listbox.curselection()
@@ -85,21 +102,46 @@ class InventoryGUI:
             return
         index = selection[0]
         item = self.inventory.pop(index)
-        messagebox.showinfo("Item Burned", f"You gained {item['value'] // 2} XP from burning {item['name']}.")
+        xp_gain = item['value'] // 2
+        self.player_xp += xp_gain
+        if self.player_xp >= self.player_level * 100:
+            self.player_level += 1
+            self.player_xp = 0
+            messagebox.showinfo("Level Up!", f"You reached Level {self.player_level}!")
+        else:
+            messagebox.showinfo("Item Burned", f"You gained {xp_gain} XP from burning {item['name']}.")
         self.update_inventory_display()
 
     def open_crafting(self):
-        messagebox.showinfo("Crafting", "Crafting system opening...")
+        top = Toplevel(self.master)
+        top.title("Crafting System")
+        tk.Label(top, text="Crafting will be implemented here.").pack(pady=10)
 
     def open_alchemy(self):
-        messagebox.showinfo("Alchemy", "Alchemy system opening...")
+        top = Toplevel(self.master)
+        top.title("Alchemy System")
+        tk.Label(top, text="Alchemy will be implemented here.").pack(pady=10)
 
-# Example usage:
+    def toggle_theme(self):
+        if self.theme == "day":
+            self.master.configure(bg="black")
+            self.theme = "night"
+        else:
+            self.master.configure(bg="white")
+            self.theme = "day"
+
+    def show_tooltip(self, event):
+        pass  # Możesz dodać własne tooltipy np. Toplevel z opisem
+
+    def hide_tooltip(self, event):
+        pass
+
+# Example usage
 if __name__ == "__main__":
     inventory = [
-        {"name": "Iron Helmet", "type": "Armor", "slot": "Head", "weight": 5, "value": 50, "allowed_classes": ["Warrior"]},
-        {"name": "Steel Sword", "type": "Weapon", "slot": "Main Weapon", "weight": 10, "value": 100, "allowed_classes": ["Warrior", "Rogue"]},
-        {"name": "Magic Rune", "type": "Rune", "slot": "Rune", "weight": 2, "value": 75, "allowed_classes": ["Mage"]},
+        {"name": "Iron Helmet", "type": "Armor", "slot": "Head", "weight": 5, "value": 50, "allowed_classes": ["Warrior"], "rarity": "common"},
+        {"name": "Steel Sword", "type": "Weapon", "slot": "Main Weapon", "weight": 10, "value": 100, "allowed_classes": ["Warrior", "Rogue"], "rarity": "epic"},
+        {"name": "Magic Rune", "type": "Rune", "slot": "Rune", "weight": 2, "value": 75, "allowed_classes": ["Mage"], "rarity": "rare"},
     ]
     character_class = "Warrior"
 
